@@ -4,6 +4,7 @@
 import argparse
 import json
 import pathlib
+import subprocess
 import sys
 
 HERE = pathlib.Path(__file__).parent
@@ -30,6 +31,9 @@ def prune(exp, res, tree):
         kept = [e for e in exp["must_keep"] if e["text"] in text[e["file"]]]
         code = [e for e in exp.get("must_survive_code", []) if e["text"] in text[e["file"]]]
         missing_code = len(exp.get("must_survive_code", [])) - len(code)
+        # A comment sweep must leave nothing behind: untracked files are gate or tool debris.
+        debris = subprocess.run(["git", "-C", str(tree), "status", "--porcelain", "--untracked-files=all"], capture_output=True, text=True, check=True).stdout
+        missing_code += sum(1 for line in debris.splitlines() if line.startswith("??"))
     else:
         props = res.get("proposals") or []
 

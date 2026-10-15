@@ -3,6 +3,24 @@
 Workflow scripts return their `version`; bump it with any change to a skill's rules or script,
 and record eval scores here.
 
+## 2.2.0 — 2026-10-15
+
+First apply-mode run (prune-comments, eval fixture): the edit path works end to end. Workers
+edited comments only, an independent `comments.ts verify` confirmed zero code changes, the
+py_compile gate stayed green against its baseline, nothing was reverted, and the critic found
+nothing left. Edited tree: recall 0.94, keep 1.0, 24 agents, 0.75M tokens.
+
+A second apply run on the pruned tree changed exactly one comment, the one 2.1 wrongly kept,
+and nothing else: final tree recall 1.0, keep 1.0, no untracked files.
+
+Fixes
+- prune-comments: the profile no longer turns a rule stated in AGENTS.md into an `extra_keep`
+  class; a code comment repeating a documented rule is a Duplicate. `extra_keep` stays empty
+  unless the docs talk about comments.
+- All four workflows: agents delete untracked files their own commands created (caches,
+  build output); the 2.1 gate step left `__pycache__/` behind.
+- Scorer: untracked files in an apply run's tree count as false positives.
+
 ## 2.1.0 — 2026-10-15
 
 Every change below came from a failed eval run; see "Lessons from the evals" in the README.

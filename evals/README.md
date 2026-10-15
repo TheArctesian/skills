@@ -23,6 +23,12 @@ python3 evals/score.py prune-comments result.json --tree <repo>   # apply run: s
 The scorer prints recall, keep rate, false positives, what was missed or wrongly flagged,
 and the workflow `version`; it exits non-zero below the bar.
 
+## Apply runs
+
+Score an apply run with `--tree <fixture copy>`: the scorer reads the edited files and also
+fails the run for any untracked file left behind (gate caches, build output). Re-run
+`comments.ts verify HEAD $(git diff --name-only)` yourself as an independent proof.
+
 ## Second-run check
 
 Run an apply-mode workflow, then run it again on the result and pass that second result
