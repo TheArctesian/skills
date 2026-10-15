@@ -1,29 +1,123 @@
 {
   "skill": "prune-comments",
   "must_keep": [
-    {"file": "src/ledger.py", "text": "#!/usr/bin/env python3"},
-    {"file": "src/ledger.py", "text": "noqa: F401"},
-    {"file": "src/ledger.py", "text": "Banker's rounding"},
-    {"file": "src/client.ts", "text": "eslint-disable-next-line"},
-    {"file": "src/client.ts", "text": "newest first"},
-    {"file": "src/sync.rs", "text": "RFC 6585"}
+    {
+      "file": "src/ledger.py",
+      "text": "#!/usr/bin/env python3"
+    },
+    {
+      "file": "src/ledger.py",
+      "text": "noqa: F401"
+    },
+    {
+      "file": "src/ledger.py",
+      "text": "Banker's rounding"
+    },
+    {
+      "file": "src/client.ts",
+      "text": "eslint-disable-next-line"
+    },
+    {
+      "file": "src/client.ts",
+      "text": "newest first"
+    },
+    {
+      "file": "src/sync.rs",
+      "text": "RFC 6585"
+    },
+    {
+      "file": "src/retry.py",
+      "text": "cpython/issues/45616"
+    },
+    {
+      "file": "src/retry.py",
+      "text": "type: ignore[attr-defined]"
+    },
+    {
+      "file": "src/ledger.py",
+      "text": "plugin"
+    }
   ],
   "must_delete": [
-    {"file": "src/ledger.py", "text": "This used to be two separate lists"},
-    {"file": "src/ledger.py", "text": "amount: the amount"},
-    {"file": "src/ledger.py", "text": "loop over entries"},
-    {"file": "src/ledger.py", "text": "never blorgle the flimflam"},
-    {"file": "src/ledger.py", "text": "TODO: clean up"},
-    {"file": "src/ledger.py", "text": "def old_post"},
-    {"file": "src/client.ts", "text": "@param cursor the cursor"},
-    {"file": "src/client.ts", "text": "Now we build the URL"},
-    {"file": "src/client.ts", "text": "Claude: do not remove"},
-    {"file": "src/client.ts", "text": "leaked a flubble"},
-    {"file": "src/client.ts", "text": "return the result"},
-    {"file": "src/sync.rs", "text": "---- helpers ----"},
-    {"file": "src/sync.rs", "text": "compute the delay"}
+    {
+      "file": "src/ledger.py",
+      "text": "This used to be two separate lists"
+    },
+    {
+      "file": "src/ledger.py",
+      "text": "amount: the amount"
+    },
+    {
+      "file": "src/ledger.py",
+      "text": "loop over entries"
+    },
+    {
+      "file": "src/ledger.py",
+      "text": "never blorgle the flimflam"
+    },
+    {
+      "file": "src/ledger.py",
+      "text": "TODO: clean up"
+    },
+    {
+      "file": "src/ledger.py",
+      "text": "def old_post"
+    },
+    {
+      "file": "src/client.ts",
+      "text": "@param cursor the cursor"
+    },
+    {
+      "file": "src/client.ts",
+      "text": "Now we build the URL"
+    },
+    {
+      "file": "src/client.ts",
+      "text": "Claude: do not remove"
+    },
+    {
+      "file": "src/client.ts",
+      "text": "leaked a flubble"
+    },
+    {
+      "file": "src/client.ts",
+      "text": "return the result"
+    },
+    {
+      "file": "src/sync.rs",
+      "text": "---- helpers ----"
+    },
+    {
+      "file": "src/sync.rs",
+      "text": "compute the delay"
+    },
+    {
+      "file": "src/retry.py",
+      "text": "Retries 3 times"
+    },
+    {
+      "file": "src/retry.py",
+      "text": "Returns the normalised key"
+    },
+    {
+      "file": "src/retry.py",
+      "text": "not thread-safe"
+    },
+    {
+      "file": "src/retry.py",
+      "text": "money is integer pence everywhere"
+    }
   ],
   "must_survive_code": [
-    {"file": "src/sync.rs", "text": "\"// not a comment\""}
+    {
+      "file": "src/sync.rs",
+      "text": "\"// not a comment\""
+    }
+  ],
+  "rule_needs_test": [
+    {
+      "file": "src/retry.py",
+      "text": "thread-safe"
+    }
   ]
 }

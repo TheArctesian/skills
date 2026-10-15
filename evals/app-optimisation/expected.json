@@ -1,12 +1,59 @@
 {
   "skill": "app-optimisation",
   "planted": [
-    {"id": "oldest-window", "file": "api/main.py", "keywords": ["ASC", "oldest", "newest", "order", "keyset", "cursor"]},
-    {"id": "n-plus-one-likes", "file": "api/main.py", "keywords": ["N+1", "n+1", "per row", "per post", "likes"]},
-    {"id": "connection-per-call", "file": "api/db.py", "keywords": ["pool", "connect", "connection"]},
-    {"id": "migrations-at-boot", "file": "api/main.py", "keywords": ["migration", "boot", "startup", "import time"]}
+    {
+      "id": "oldest-window",
+      "file": "api/main.py",
+      "keywords": [
+        "ASC",
+        "oldest",
+        "newest",
+        "order",
+        "keyset",
+        "cursor"
+      ]
+    },
+    {
+      "id": "n-plus-one-likes",
+      "file": "api/main.py",
+      "keywords": [
+        "N+1",
+        "n+1",
+        "per row",
+        "per post",
+        "likes"
+      ]
+    },
+    {
+      "id": "connection-per-call",
+      "file": "api/db.py",
+      "keywords": [
+        "pool",
+        "connection per",
+        "new connection",
+        "fresh connection"
+      ]
+    },
+    {
+      "id": "migrations-at-boot",
+      "file": "api/main.py",
+      "keywords": [
+        "migration",
+        "boot",
+        "startup",
+        "import time"
+      ]
+    }
   ],
   "decoys": [
-    {"id": "cached-countries", "file": "api/main.py", "keywords": ["country", "countries", "lru_cache"]}
+    {
+      "id": "cached-countries",
+      "file": "api/main.py",
+      "keywords": [
+        "country",
+        "countries",
+        "lru_cache"
+      ]
+    }
   ]
 }

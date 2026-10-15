@@ -22,7 +22,10 @@ run; invoking the skill is the opt-in. They share one shape so they work on any 
 3. **Pipeline.** Each component, and each shard inside it, flows through its stages without
    waiting for the others (`pipeline()`); barriers only where a stage needs every result.
 4. **Verify.** Every destructive or opinionated call (a deletion, a finding, a suspected gap)
-   is checked by verifiers that each look for a different way it could be wrong.
+   is checked by verifiers that each test a different condition, combined by logic rather
+   than vote: when every condition is necessary (is it real, is it worth it, does the fix
+   fit) all must pass; when any one is a sufficient defence (a test guards a unique
+   contract) one is enough.
 5. **Critic.** A final agent looks for what was missed and feeds another round until dry.
 6. **Prove.** Mechanical checks where possible: comment-only diffs, mutation tests, gate
    baselines, reproduced benchmarks.

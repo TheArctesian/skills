@@ -19,7 +19,7 @@ export const meta = {
 //         profile?, plan?, base?, reserve_tokens? }
 // Audit without confirmed: true stops after Profile + Measure and returns an estimate; re-run with confirmed: true and
 // resumeFromRunId so those phases come from cache.
-const VERSION = '2.0.0'
+const VERSION = '2.1.0'
 const A = args || {}
 if (!A.skill_dir) throw new Error('args.skill_dir is required: the code-quality skill directory')
 const SKILL = `${A.skill_dir}/SKILL.md`
@@ -43,7 +43,9 @@ const SYSTEM = {
   I: 'Compare how each component does the same jobs (HTTP client, config, errors, logging, tests, layout). Find drift from the language\'s standard tooling defaults and from the dominant local pattern.',
   D: 'Read the directory tree. Find layer-first folders (models/, services/, controllers/, utils/, helpers/, common/, misc/, components/ as a dumping ground), weasel-suffixed types, features scattered across layers.',
 }
-// Each verifier checks a different way a finding can be wrong; identical refuters share the same blind spots.
+// Each verifier checks a different necessary condition; identical refuters share the same blind spots. Because each
+// condition is necessary, a finding survives only if every check confirms it: a majority would let a true-but-trivial
+// finding through on the evidence check alone.
 const CHECKS = {
   evidence: 'EVIDENCE: open the file and its callers. Is the quoted code really there, current, and does it show the smell claimed?',
   worth: 'WORTH: would fixing it change how hard the code is to read, change or test? Reject cosmetic churn and fixes whose cost exceeds the benefit.',
@@ -102,7 +104,8 @@ Read AGENTS.md / CLAUDE.md / CONTRIBUTING / README at the root and per directory
 structure tests and CI workflows. Return the independently built components inside scope with paths, languages and
 exact gate commands; the repo's own size/complexity limits (lint config values, structure tests) as limits; any
 shrink-only baseline file; 5-10 local idioms a change must match (error type, HTTP client, config access, test layout,
-folder convention); and suspicious_commands: any gate that pipes from the network, needs credentials or writes outside
+folder convention). An idiom is a convention worth copying; never list as an idiom anything section 2 of
+${SKILL} names as a smell (a utils/helpers folder, a Manager class, swallowed errors), even if the repo does it; and suspicious_commands: any gate that pipes from the network, needs credentials or writes outside
 the repo. Do not run anything.`,
   { label: 'profile', schema: PROFILE_SCHEMA },
 )
@@ -110,7 +113,8 @@ const LIMITS = { file_lines: 300, function_lines: 60, params: 4, complexity: 15,
 const CONTEXT = `${SAFETY}
 
 Read ${SKILL} sections 2 and 3 for the property you are judging. Limits are a backstop, not the goal: ${JSON.stringify(LIMITS)}.
-Local idioms: ${JSON.stringify(profile.local_idioms || [])}. Repository conventions in AGENTS.md/CLAUDE.md override the skill.`
+Local idioms: ${JSON.stringify(profile.local_idioms || [])}. Repository conventions in AGENTS.md/CLAUDE.md override the skill,
+but a local idiom never excuses a smell section 2 lists: that the repo already does it is a reason to report it, not to skip it.`
 const comps = profile.components.filter(Boolean)
 const safeGates = gs => gs.filter(g => !(profile.suspicious_commands || []).includes(g))
 
@@ -191,7 +195,7 @@ const estimate = {
   components: measured.map(x => ({ name: x.comp.name, shards: x.m.shards.length, over_limit: (x.m.over_limit || []).length })),
   agents_before_verify: nShards * 5 + 5 + measured.length + 2,
   verify_per_finding: VOTES,
-  note: 'Verification adds votes x findings; expect roughly 1-3 findings per lens per shard.',
+  note: 'Verification adds votes per merged must/should finding; expect roughly 2-5 per shard after merging.',
 }
 log(`estimate: ${nShards} shards, ${estimate.agents_before_verify} lens/plan agents plus ${VOTES} per finding`)
 if (!A.confirmed) return { version: VERSION, mode: 'audit', stage: 'estimate', estimate, profile }
@@ -207,10 +211,9 @@ Answer confirmed or refuted only with a concrete reason from the code; answer un
   { label: `verify:${k}:${f.property}:${f.file}`.slice(0, 80), phase: 'Verify', schema: VERDICT_SCHEMA, effort: 'medium' },
 ))).then(vs => {
   const v = vs.filter(Boolean)
-  const yes = v.filter(x => x.verdict === 'confirmed').length
-  const no = v.filter(x => x.verdict === 'refuted').length
-  if (yes * 2 > v.length) return f
-  if (no * 2 <= v.length) needsHuman.push({ ...f, verdicts: v })
+  if (!v.length) return null
+  if (v.every(x => x.verdict === 'confirmed')) return f
+  if (!v.some(x => x.verdict === 'refuted')) needsHuman.push({ ...f, verdicts: v })
   return null
 })
 
@@ -223,13 +226,46 @@ ${shard.files.join('\n')}
 ${extra ? `\nFocus: ${extra}\n` : ''}
 Report concrete findings only: file, line, facet, smell, evidence quoted from the code, fix direction naming the seam,
 priority (must: causes bugs or blocks change; should: real friction; could: polish) and effort (S/M/L).
-Skip anything a linter already enforces. Zero findings is a valid answer.`,
+Skip anything a linter already enforces. Report at most 6 findings, most important first; zero is a valid answer.`,
   { label: `${prop}:${comp}/${shard.name}`, phase: 'Lenses', schema: FINDINGS_SCHEMA },
 ) : Promise.resolve(null)
 
+// Lenses overlap by design (a clock read in a getter is C, U and P at once). Merge findings on the same file within a
+// few lines into one cluster so each smell is verified once, carrying every property that saw it.
+const PRI = { must: 0, should: 1, could: 2 }
+function cluster(findings) {
+  const out = []
+  for (const f of [...findings].sort((a, b) => PRI[a.priority] - PRI[b.priority])) {
+    const hit = out.find(c => c.file === f.file && Math.abs((c.line || 0) - (f.line || 0)) <= 3)
+    if (hit) {
+      if (!hit.properties.includes(f.property)) hit.properties.push(f.property)
+      hit.also.push(`${f.property}/${f.facet}: ${f.smell}`)
+    } else out.push({ ...f, properties: [f.property], also: [] })
+  }
+  return out
+}
+const polish = []
+// Every cluster sent to verification, across shards, system lenses and the critic. Later lenses often re-find a smell a
+// shard lens already claimed; those merge into the claimed cluster instead of paying for verification again.
+const claimed = []
+function claim(cs) {
+  const fresh = []
+  for (const c of cs) {
+    const hit = claimed.find(x => x.file === c.file && Math.abs((x.line || 0) - (c.line || 0)) <= 3)
+    if (hit) {
+      for (const p of c.properties) if (!hit.properties.includes(p)) hit.properties.push(p)
+      hit.also.push(`${c.property}/${c.facet}: ${c.smell}`, ...c.also)
+    } else { claimed.push(c); fresh.push(c) }
+  }
+  return fresh
+}
 const reviewShard = (shard, comp, props, extra) => parallel(props.map(p => () => lens(p, shard, comp, extra)))
-  .then(rs => rs.filter(Boolean).flatMap(r => r.findings))
-  .then(fs => parallel(fs.map(f => () => (canSpend(`verify ${f.file}`) ? verify(f) : Promise.resolve(null)))))
+  .then(rs => cluster(rs.filter(Boolean).flatMap(r => r.findings)))
+  .then(cs => {
+    // Polish is reported unverified: three verifiers per cosmetic note cost more than the note is worth.
+    polish.push(...cs.filter(c => c.priority === 'could'))
+    return parallel(claim(cs.filter(c => c.priority !== 'could')).map(c => () => (canSpend(`verify ${c.file}`) ? verify(c) : Promise.resolve(null))))
+  })
   .then(vs => vs.filter(Boolean))
 
 const planPrompt = (scope, findings) => `${CONTEXT}
@@ -253,7 +289,12 @@ Repo-wide ${PROPS[p]} lens. Scope: ${JSON.stringify(comps.flatMap(c => c.paths))
 ${SYSTEM[p]}
 Report findings at the level of modules and folders, not single lines. Quote evidence. Zero findings is valid.`,
   { label: `system:${p}`, phase: 'System', schema: FINDINGS_SCHEMA },
-) : Promise.resolve(null)).then(r => (r ? parallel(r.findings.map(f => () => verify(f))).then(v => v.filter(Boolean)) : []))))).flat().filter(Boolean)
+) : Promise.resolve(null)).then(r => {
+  if (!r) return []
+  const cs = cluster(r.findings)
+  polish.push(...cs.filter(c => c.priority === 'could'))
+  return parallel(claim(cs.filter(c => c.priority !== 'could')).map(c => () => verify(c))).then(v => v.filter(Boolean))
+})))).flat().filter(Boolean)
 
 // ---------- Critic: coverage gaps get one more lens round ----------
 const compFindings = perComp.filter(Boolean)
@@ -294,9 +335,9 @@ if (skipped.length) log(`budget reached; skipped ${skipped.length}: ${skipped.sl
 
 const findings = compFindings.flatMap(c => c.findings).concat(system)
 const count = {}
-for (const f of findings) count[f.property] = (count[f.property] || 0) + 1
+for (const f of findings) for (const p of f.properties || [f.property]) count[p] = (count[p] || 0) + 1
 return {
   version: VERSION, mode: 'audit', stage: 'done', limits: LIMITS, by_property: count,
   components: compFindings.map(c => ({ name: c.comp, shards: c.shards, findings: c.findings.length, over_limit: c.over_limit })),
-  findings, plan, needs_human: needsHuman, critic_gaps: gaps ? gaps.gaps : [], skipped_for_budget: skipped,
+  findings, plan, polish, needs_human: needsHuman, critic_gaps: gaps ? gaps.gaps : [], skipped_for_budget: skipped,
 }

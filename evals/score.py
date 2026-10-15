@@ -42,10 +42,14 @@ def prune(exp, res, tree):
         deleted = [e for e in exp["must_delete"] if verdict(e) == "gone"]
         kept = [e for e in exp["must_keep"] if verdict(e) == "kept"]
         missing_code = 0
+    rnt = res.get("rule_needs_test") or []
+    found_rules = [e for e in exp.get("rule_needs_test", []) if any(same_file(r.get("file"), e["file"]) and norm(e["text"]) in blob(r) for r in rnt)]
     return {
         "recall": len(deleted) / len(exp["must_delete"]),
         "keep": len(kept) / len(exp["must_keep"]),
         "false_positives": missing_code,
+        "rule_findings": f"{len(found_rules)}/{len(exp.get('rule_needs_test', []))}",
+        "rules_ok": len(found_rules) == len(exp.get("rule_needs_test", [])),
         "missed": [e["text"] for e in exp["must_delete"] if e not in deleted],
         "wrongly_removed": [e["text"] for e in exp["must_keep"] if e not in kept],
     }
@@ -56,7 +60,7 @@ def cupid(exp, res, _tree):
     hit, wrong_prop = [], []
     for p in exp["planted"]:
         on_file = [f for f in findings if same_file(f.get("file"), p["file"]) and any(norm(k) in blob(f) for k in p["keywords"])]
-        if any(f.get("property") == p["property"] for f in on_file):
+        if any(p["property"] in (f.get("properties") or [f.get("property")]) for f in on_file):
             hit.append(p["id"])
         elif on_file:
             wrong_prop.append(p["id"])
@@ -94,11 +98,12 @@ def perf(exp, res, _tree):
     gaps = [g for lane in res.get("lanes") or [] for g in lane.get("gaps") or []]
     confirmed = [g for g in gaps if g.get("confirmed")]
 
+    # A gap is "about" what its title names; evidence and fix text mention neighbouring code too freely to match on.
     def matches(g, p):
-        return any(same_file(ev.split(":")[0], p["file"]) or norm(p["file"]) in norm(ev) for ev in g.get("evidence") or []) and any(norm(k) in blob(g) for k in p["keywords"])
+        return any(same_file(ev.split(":")[0], p["file"]) or norm(p["file"]) in norm(ev) for ev in g.get("evidence") or []) and any(norm(k) in norm(g.get("title")) for k in p["keywords"])
 
     hit = [p["id"] for p in exp["planted"] if any(matches(g, p) for g in confirmed)]
-    fps = [d["id"] for d in exp["decoys"] if any(matches(g, d) and not any(matches(g, p) for p in exp["planted"]) for g in confirmed)]
+    fps = [d["id"] for d in exp["decoys"] if any(matches(g, d) for g in confirmed)]
     return {
         "recall": len(hit) / len(exp["planted"]),
         "keep": 1.0,
@@ -129,7 +134,7 @@ def main():
         t = again.get("totals") or {}
         score["second_run_changes"] = (t.get("deleted", 0) + t.get("rewritten", 0)) if a.skill == "prune-comments" else len(again.get("findings") or again.get("refuted") or [])
     score["version"] = res.get("version")
-    score["pass"] = score["recall"] >= THRESHOLDS["recall"] and score["keep"] >= THRESHOLDS["keep"] and score["false_positives"] <= THRESHOLDS["false_positives"]
+    score["pass"] = score["recall"] >= THRESHOLDS["recall"] and score["keep"] >= THRESHOLDS["keep"] and score["false_positives"] <= THRESHOLDS["false_positives"] and score.get("rules_ok", True)
     print(json.dumps(score, indent=2, ensure_ascii=False))
     sys.exit(0 if score["pass"] else 1)
 

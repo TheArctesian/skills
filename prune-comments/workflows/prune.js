@@ -17,7 +17,7 @@ export const meta = {
 //         shard_size?, max_comment_lines?, rounds?, runner?, profile?, reserve_tokens? }
 // Without confirmed: true the run stops after Profile + Inventory and returns an estimate. Re-run with the
 // same args plus confirmed: true and resumeFromRunId so those phases come from cache.
-const VERSION = '2.0.0'
+const VERSION = '2.1.0'
 const A = args || {}
 if (!A.skill_dir) throw new Error('args.skill_dir is required: the prune-comments skill directory')
 const SKILL = `${A.skill_dir}/SKILL.md`
@@ -70,7 +70,7 @@ const SWEEP_SCHEMA = {
   properties: {
     touched: STRS, deleted: { type: 'number' }, rewritten: { type: 'number' }, kept: { type: 'number' },
     by_class: { type: 'object', additionalProperties: { type: 'number' } },
-    proposals: { type: 'array', items: PROPOSAL, description: 'audit mode only: every comment and its verdict' },
+    proposals: { type: 'array', items: PROPOSAL, description: 'audit mode only: every comment and its verdict, class as a SKILL.md section 3 slug' },
     rule_needs_test: { type: 'array', items: { type: 'object', properties: { file: STR, line: { type: 'number' }, text: STR, test: STR } } },
     renames: STRS, agent_addressed: STRS, code_change_needed: STRS,
   },
@@ -105,7 +105,8 @@ log(`${comps.length} components: ${comps.map(c => c.name).join(', ')}`)
 
 const RULES = `${SAFETY}
 
-Read ${SKILL} sections 2 (the test), 3 (eternal laws) and 4 (rewriting survivors) first and apply them exactly.
+Read ${SKILL} sections 2 (the test), 3 (eternal laws, and the class slugs to report) and 4 (rewriting survivors)
+first and apply them exactly. Every hazard comment you delete under section 3 needs a rule_needs_test entry.
 Aggressiveness: ${AGGR} (section 6). Contract docs: ${JSON.stringify(profile.contract_docs || [])}.
 Linter-required docs: ${JSON.stringify(profile.required_docs || [])}. Extra keep classes: ${JSON.stringify(profile.extra_keep || [])}.`
 

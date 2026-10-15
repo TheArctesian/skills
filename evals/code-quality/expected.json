@@ -1,13 +1,89 @@
 {
   "skill": "code-quality",
   "planted": [
-    {"id": "nondeterministic-total", "property": "P", "file": "src/billing/invoice.ts", "keywords": ["Date", "determin", "clock", "Sunday", "getDay"]},
-    {"id": "swallowed-error", "property": "P", "file": "src/billing/invoice.ts", "keywords": ["catch", "swallow", "silent"]},
-    {"id": "getter-writes", "property": "P", "file": "src/billing/invoice.ts", "keywords": ["getTotal", "side effect", "writeCsv", "writes"]},
-    {"id": "bool-flag-params", "property": "C", "file": "src/billing/invoice.ts", "keywords": ["boolean", "flag", "draft", "urgent"]},
-    {"id": "grab-bag-utils", "property": "D", "file": "src/utils/helpers.ts", "keywords": ["utils", "helpers", "grab", "domain"]},
-    {"id": "weasel-manager", "property": "D", "file": "src/billing/InvoiceManager.ts", "keywords": ["Manager", "weasel", "process", "data"]},
-    {"id": "non-idiomatic-ts", "property": "I", "file": "src/billing/InvoiceManager.ts", "keywords": ["var", "any", "for loop", "filter", "idiom"]}
+    {
+      "id": "nondeterministic-total",
+      "property": "P",
+      "file": "src/billing/invoice.ts",
+      "keywords": [
+        "Date",
+        "determin",
+        "clock",
+        "Sunday",
+        "getDay"
+      ]
+    },
+    {
+      "id": "swallowed-error",
+      "property": "P",
+      "file": "src/billing/invoice.ts",
+      "keywords": [
+        "catch",
+        "swallow",
+        "silent"
+      ]
+    },
+    {
+      "id": "getter-writes",
+      "property": "P",
+      "file": "src/billing/invoice.ts",
+      "keywords": [
+        "getTotal",
+        "side effect",
+        "writeCsv",
+        "writes"
+      ]
+    },
+    {
+      "id": "bool-flag-params",
+      "property": "C",
+      "file": "src/billing/invoice.ts",
+      "keywords": [
+        "boolean",
+        "flag",
+        "draft",
+        "urgent"
+      ]
+    },
+    {
+      "id": "grab-bag-utils",
+      "property": "D",
+      "file": "src/utils/helpers.ts",
+      "keywords": [
+        "utils",
+        "helpers",
+        "grab",
+        "domain"
+      ]
+    },
+    {
+      "id": "weasel-manager",
+      "property": "D",
+      "file": "src/billing/InvoiceManager.ts",
+      "keywords": [
+        "Manager",
+        "weasel",
+        "process",
+        "data"
+      ]
+    },
+    {
+      "id": "non-idiomatic-ts",
+      "property": "I",
+      "file": "src/billing/InvoiceManager.ts",
+      "keywords": [
+        "var",
+        "any",
+        "for loop",
+        "filter",
+        "idiom"
+      ]
+    }
   ],
-  "clean_files": ["src/billing/money.ts", "src/billing/result.ts"]
+  "clean_files": [
+    "src/billing/money.ts",
+    "src/billing/result.ts",
+    "src/billing/receipt.ts",
+    "src/billing/checkout.ts"
+  ]
 }

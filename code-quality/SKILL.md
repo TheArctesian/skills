@@ -171,9 +171,9 @@ lose the report while the edits stay in the tree.
 |---|---|---|
 | Profile | 1 | Components, languages, gates, the repo's own limits and baseline, local idioms worth matching. |
 | Measure | 1 per component | Section 3 signals per file; groups files into review shards along directories or concepts. |
-| Lenses | 5 per shard | One reviewer per CUPID property, each reading the shard in full against section 2 with only its own property in mind. |
+| Lenses | 5 per shard | One reviewer per CUPID property, each reading the shard in full against section 2 with only its own property in mind; at most 6 findings each. |
 | System | 5 | Repo-wide lens per property: dependency graph and cycles (C), tree shape (D), cross-component idiom drift (I), error and observability strategy (P), units with mixed purposes spanning files (U). |
-| Verify | `votes` per finding | Each verifier runs a different check: evidence (is the code really like that?), worth (is the churn justified?), fit (is the fix an overcorrection or off-idiom?). Verdicts are confirmed, refuted or uncertain; a finding needs a confirmed majority, and findings without a refuted majority go to `needs_human` instead of being dropped. |
+| Verify | `votes` per finding | Each verifier runs a different check: evidence (is the code really like that?), worth (is the churn justified?), fit (is the fix an overcorrection or off-idiom?). Each check is a necessary condition, so a finding survives only if all of them confirm; any refutation drops it, and anything else goes to `needs_human`. Findings on the same lines are merged first so each smell is verified once, and `could` (polish) findings are reported unverified. |
 | Plan | 1 per component, then 1 merge | Per-component plans keep each prompt small; the merge sees item summaries, folds shared seams, fixes cross-component `depends_on`, and orders by dependency, then by must/should/could. No numeric scores. |
 | Critic | 1 | Names properties, components or signals with no coverage; those get another lens round. |
 

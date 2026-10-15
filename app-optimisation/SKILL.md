@@ -59,7 +59,7 @@ gates, synthetic-data seeding and cross-lane contracts.
 | Profile | 1 | Lanes, owners, build/run, gates, deploy model, cross-lane contracts. |
 | Sweep | 4 per lane | Separate angles, blind to each other: startup path; hot screens/endpoints (pagination order, caching, N+1, unbounded reads, "older content loads slowly"); existing perf tooling and how to run locally; the lane's checklist in [references/lanes.md](references/lanes.md). |
 | Rank | 1 per lane | Merges the sweeps into the top 8 gaps by user-noticeable impact, the metric each moves, the harness the lane needs, handoffs. |
-| Verify | `votes` per gap | Each verifier runs a different check: does the cited code really do this (evidence), is it on a user-noticeable path (hot), is it already absorbed by a cache, index or job (mitigated)? Explore agents sometimes report something that isn't so. Confirmed gaps become candidates, uncertain ones go under "measure before believing", refuted ones are listed and dropped. |
+| Verify | `votes` per gap | Each verifier runs a different check: does the cited code really do this (evidence), is it on a user-noticeable path (hot), is it already absorbed by a cache, index or job (mitigated)? Explore agents sometimes report something that isn't so. Each check is necessary, so a gap is confirmed only if all of them confirm; one refutation drops it (listed), anything else goes under "measure before believing". Small lanes (under 25 source files) get one combined sweep instead of four, and the rank step reports up to 8 gaps, not exactly 8. |
 | Prompt | 1 per lane | Fills [references/lane-prompt.md](references/lane-prompt.md) with confirmed gaps only, so it stands alone. |
 
 ## 3. Hand the prompts over
