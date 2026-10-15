@@ -5,6 +5,11 @@ and record eval scores here.
 
 ## 2.0.0 — 2026-10-15
 
+Eval scores
+- prune-comments (audit, 2026-10-15): recall 1.0, keep 1.0, false positives 0; 13 agents
+  (4 for the estimate), ~490k subagent tokens, ~1.5 min. Reviewers overturned 0 of 19 samples.
+- code-quality, test-audit, app-optimisation: not yet run.
+
 All four skills
 - Repo-agnostic: a Profile phase discovers components, gates, conventions and CI routing;
   nothing repository-specific is hard-coded.
