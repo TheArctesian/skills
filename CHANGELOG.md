@@ -3,6 +3,25 @@
 Workflow scripts return their `version`; bump it with any change to a skill's rules or script,
 and record eval scores here.
 
+## 2.4.0 — 2026-10-15
+
+app-optimisation `execute` verified on the eval fixture against a throwaway local Postgres 17: the
+lane built a harness (seeder, benchmark, contract tests), kept five fixes each with before/after
+numbers, and an independent agent reproduced every performance fix against its parent. Feed at 50
+VUs went from 8.9 to 2,340 rps (p50 5.4 s to 20 ms); boot from 1.1 s with deadlocks to 0.3 s; 23 tests
+pass. The one non-performance fix kept (`/countries` empty-cache guard) was correctly reported as not
+reproducing a speed-up. 9 agents, 0.69M tokens, 56 minutes.
+
+Fixes
+- Reproductions ran in parallel against one shared database: harness resets corrupted each other's
+  measurements, connections ran out, and one agent started its own Postgres cluster. Reproductions now
+  run serially, alternating parent and fix, each on a fresh database it creates and drops. Lanes in
+  execute mode run serially unless `parallel_lanes: true`.
+- A lane left a four-worker uvicorn running. Every workflow now tells agents to stop each server,
+  database or background process they start.
+- Execute mode takes `env` (appended to every lane prompt, overriding what it contradicts) and
+  `root_from` (rewritten to `root`), instead of hand-editing 16k-character prompts.
+
 ## 2.3.0 — 2026-10-15
 
 Apply mode verified for two more skills, on eval fixtures with independent checks.
@@ -23,8 +42,6 @@ Fixes
   above ran zero skill-side mutations because no gap was restored.
 - Evals: test-audit apply runs are scored by production mutations the suite must catch; the
   code-quality fixture pins TypeScript 5.9.3 with a lockfile and `setup.sh` installs it offline.
-
-Not yet verified: app-optimisation `execute` (needs a local Postgres and Python dependencies).
 
 ## 2.2.0 — 2026-10-15
 

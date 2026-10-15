@@ -85,11 +85,15 @@ backend contract changes (new cursors, newest-first windows) land before the cli
 that consume them.
 
 **Or execute them as a workflow.** If the person approves the prompts and wants them
-run unattended, rerun `workflows/lanes.js` with `mode: "execute"` and
-`prompts: [{lane, prompt}]`. Each lane runs harness-first in its own git worktree on a
+run unattended, rerun `workflows/lanes.js` with `mode: "execute"`,
+`prompts: [{lane, prompt}]` from the explore result, and `env` describing the local engine (database URL,
+interpreter, volume limits); `env` is appended to every prompt and overrides what it contradicts. Pass
+`root_from` when the prompts were written for a different checkout path. Each lane runs harness-first in its own git worktree on a
 `perf/<lane>` branch, committing each kept fix with its table row; then, for every kept
 fix, an independent agent checks out the fix and its parent and reruns the harness at
-least three times. A fix whose improvement does not reproduce beyond noise is flagged
+least three times, alternating them, on a fresh database of its own. Lanes and reproductions
+run one at a time, because benchmarks sharing a machine and a database invalidate each other
+(`parallel_lanes: true` only when lanes are truly isolated). A fix whose improvement does not reproduce beyond noise is flagged
 before any PR opens. Nothing is pushed, merged or deployed.
 
 ## 4. Approvals do not relay

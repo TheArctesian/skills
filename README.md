@@ -63,5 +63,9 @@ Each of these came from a failed eval run, not from design up front:
 - **Vague rules get followed literally.** "Trim a suppression's reason to the shortest the linter
   accepts" produced bare `# noqa` lines, because the linter accepts none. "Concurrency" listed as
   an architectural rule kept a hazard comment that should have become a test finding.
+- **Parallel agents must not share stateful resources.** Benchmark reproductions run in parallel
+  against one database reset each other's indexes and ran out of connections; one agent started its
+  own Postgres cluster to escape. Anything load- or state-sensitive runs serially on its own resources,
+  and every agent stops what it starts.
 - **The skill will out-review your fixture.** Several "false positives" on supposedly clean
   files were real bugs in the fixture. Check a false positive before tightening the skill.
