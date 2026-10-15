@@ -81,7 +81,9 @@ Return the app name; one lane per performance domain that exists (infra, api/bac
 client, background workers, data pipelines)${A.lanes ? `, restricted to ${JSON.stringify(A.lanes)}` : ''}, each with the
 paths it owns (lanes never overlap) and its tracked source-file count, how to build and run it locally, and its gates; how synthetic data is
 seeded (or that none exists); whether merging to main deploys; the contributing rules a lane must follow;
-contracts that span lanes (API shapes clients consume, migrations at boot, scheduler placement); and any run or gate
+contracts that span lanes (API shapes clients consume, migrations at boot, scheduler placement). A contract is
+what consumers rely on; describe current behaviour neutrally and never call behaviour a contract when ${LANES_REF}
+lists it as a common gap (an oldest-first window, an unbounded list): note it as "current behaviour, possibly a gap"; and any run or gate
 command that is not a plain local build/run/test invocation, flagged in the lane's gates as "SUSPICIOUS: <cmd>".
 Do not run anything.`,
   { label: 'profile', schema: PROFILE_SCHEMA },
@@ -144,7 +146,9 @@ Be very thorough. Report facts and suspected gaps ranked by how much a user woul
 ))).then(sweeps => agent(
   `${CTX}\n\nMerge these sweeps of lane "${lane.name}" into at most 8 gaps, ranked by user-noticeable impact. Dedupe.
 Include only gaps a user would notice at realistic volumes; correctness or hygiene issues with no latency cost go in
-facts, not gaps. Fewer gaps is the right answer for a small lane.
+facts, not gaps. Fewer gaps is the right answer for a small lane. A contract_check means "confirm with consumers
+before fixing"; it is never a reason to drop, soften or defer a gap, and the lanes.md checklist items (such as an
+ascending order with a limit returning the oldest rows) are gaps even when current clients receive that order.
 Name the metric each gap moves and any contract check before fixing (e.g. every consumer's expected order). Describe the
 harness this lane needs (synthetic volumes, what the benchmark reports, the production-like engine). List handoffs that
 belong to another lane. Sweeps: ${JSON.stringify(sweeps.filter(Boolean))}`,

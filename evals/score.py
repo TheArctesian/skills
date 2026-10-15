@@ -84,7 +84,8 @@ def tests(exp, res, _tree):
         return ms[0].get("mark") if ms else "R"
 
     flagged = [e for e in exp["must_flag"] if mark_of(e) in e["marks"]]
-    kept = [e for e in exp["must_keep"] if mark_of(e) == "R"]
+    # F keeps the contract and repairs the assertion, so it counts as kept; only C and D remove a test.
+    kept = [e for e in exp["must_keep"] if mark_of(e) in ("R", "F")]
     return {
         "recall": len(flagged) / len(exp["must_flag"]),
         "keep": len(kept) / len(exp["must_keep"]),

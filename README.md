@@ -41,3 +41,27 @@ run them before changing a skill. Versions and scores live in [CHANGELOG.md](CHA
 
 Each script takes `args.skill_dir` (the skill's base directory) so its agents can read the
 skill's rules instead of copies of them. Nothing in a workflow pushes, merges or deploys.
+
+## Lessons from the evals
+
+Each of these came from a failed eval run, not from design up front:
+
+- **Discovery must not bless what it describes.** A profile step that records current behaviour
+  as a "local idiom" or a "client contract" teaches every later agent to protect it. A
+  `utils/helpers` folder recorded as the local convention stopped the domain lens flagging it;
+  an oldest-first feed recorded as a contract got preserved as a feature. Profiles now describe
+  behaviour neutrally and never list a known smell or gap as a convention.
+- **Combine different checks by logic, not by vote.** Three verifiers testing three necessary
+  conditions (is it real, is it worth it, does the fix fit) must all agree; a 2-1 majority let a
+  true-but-trivial finding through on the "it's real" check alone. Where each check is a
+  sufficient defence, one is enough.
+- **Don't ask for a fixed number of results.** "Top 8 gaps" on a two-file lane produced padding,
+  and the padding is where the decoy got in. Ask for "at most N".
+- **Merge before you verify.** Lenses overlap by design, so the same smell arrives three to five
+  times; verifying each copy cost more than the audit. Merging by file and line cut one audit
+  from 209 agents to 62.
+- **Vague rules get followed literally.** "Trim a suppression's reason to the shortest the linter
+  accepts" produced bare `# noqa` lines, because the linter accepts none. "Concurrency" listed as
+  an architectural rule kept a hazard comment that should have become a test finding.
+- **The skill will out-review your fixture.** Several "false positives" on supposedly clean
+  files were real bugs in the fixture. Check a false positive before tightening the skill.

@@ -1,12 +1,12 @@
-import { Pence, add, pence } from './money';
+import { Pence, add } from './money';
 import { sendEmail, writeCsv } from '../utils/helpers';
 
 export interface Line { sku: string; amount: Pence }
 
 export function getTotal(lines: Line[]): Pence {
-  let total = pence(0);
+  let total = 0 as Pence;
   for (const l of lines) total = add(total, l.amount);
-  if (new Date().getDay() === 0) total = pence(total * 0.9);
+  if (new Date().getDay() === 0) total = Math.round(total * 0.9) as Pence;
   try {
     writeCsv('/tmp/last-total.csv', String(total));
   } catch {}

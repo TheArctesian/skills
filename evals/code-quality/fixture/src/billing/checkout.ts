@@ -1,4 +1,5 @@
-import { parsePence, receiptLine } from './receipt';
+import { parsePence } from './money';
+import { receiptLine } from './receipt';
 import { Result, ok } from './result';
 
 export function checkoutLine(sku: string, rawAmount: string): Result<string> {
