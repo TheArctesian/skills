@@ -1,0 +1,15 @@
+{
+  "skill": "test-audit",
+  "must_flag": [
+    {"file": "tests/test_pricing.py", "test": "test_member_discount_again", "marks": ["C", "D"]},
+    {"file": "tests/test_pricing.py", "test": "test_is_member_private", "marks": ["C", "D"]},
+    {"file": "tests/test_pricing.py", "test": "test_price_runs", "marks": ["D", "F"]},
+    {"file": "tests/test_pricing.py", "test": "test_format_matches_itself", "marks": ["D", "F"]},
+    {"file": "tests/test_pricing.py", "test": "test_source_uses_floor_division", "marks": ["D", "C"]}
+  ],
+  "must_keep": [
+    {"file": "tests/test_pricing.py", "test": "test_member_discount_rounds_down"},
+    {"file": "tests/test_pricing.py", "test": "test_negative_price_rejected"},
+    {"file": "tests/test_pricing.py", "test": "test_format_price_pounds"}
+  ]
+}
