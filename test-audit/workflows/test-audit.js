@@ -19,7 +19,7 @@ export const meta = {
 //         reserve_tokens? }
 // Without confirmed: true the run stops after Profile + Lanes and returns an estimate; re-run with confirmed: true and
 // resumeFromRunId so those phases come from cache.
-const VERSION = '2.2.0'
+const VERSION = '2.3.0'
 const A = args || {}
 if (!A.skill_dir) throw new Error('args.skill_dir is required: the test-audit skill directory')
 const MODE = A.mode || 'audit'
@@ -207,7 +207,14 @@ fail (a rejection row production never reaches). Restore each real gap into its 
   )
   if (!g) continue
   const mutations = []
-  for (const gap of g.gaps.filter(x => !x.unreachable_assertion)) {
+  // Every keeper contract gets a mutation, not only restored gaps: lost coverage nobody reported is exactly what a
+  // reviewer misses, and a keeper that cannot go red proves nothing.
+  const targets = [
+    ...g.gaps.filter(x => !x.unreachable_assertion),
+    ...((p.layer && p.layer.keepers) || []).map(k => ({ contract: k.contract, keeper: k.suite })),
+  ]
+  for (const gap of targets) {
+    if (!canSpend(`mutate ${p.lane}`)) break
     mutations.push(await agent(
       `${CTX}\n\nMutation check. Note \`git diff -- <owner file>\` first. Make ONE deliberate mutation of the production owner
 ${gap.owner_file || '(find it)'} that breaks: ${gap.contract}. Run the keeper ${gap.keeper || ''}; it must go red. Restore the source

@@ -16,7 +16,7 @@ export const meta = {
 // args: { skill_dir (required), root?, confirmed?, lanes?, mode?: 'explore' | 'execute', votes?, profile?, prompts?, reserve_tokens? }
 // Explore without confirmed: true stops after Profile and returns an estimate; re-run with confirmed: true and
 // resumeFromRunId so Profile comes from cache. Execute needs the prompts the person approved.
-const VERSION = '2.2.0'
+const VERSION = '2.3.0'
 const A = args || {}
 if (!A.skill_dir) throw new Error('args.skill_dir is required: the app-optimisation skill directory')
 const RESERVE = A.reserve_tokens || 80000
@@ -113,10 +113,13 @@ if ((A.mode || 'explore') === 'execute') {
 
 ${p.prompt}
 
-You are running in an isolated git worktree. Create branch perf/${p.lane} from HEAD and commit each kept fix
-separately, with its before/after row in the message. Do not push, merge, deploy, or touch any cloud resource.
+Work in your own git worktree of the target repository, never its main working tree (other items run in parallel):
+  wt="$(git rev-parse --path-format=absolute --git-common-dir)/agent-worktrees/perf/${p.lane}"
+  git worktree add "$wt" -b perf/${p.lane} HEAD
+then cd "$wt" for every edit and command. After committing, run git worktree remove "$wt" (the branch stays).
+Commit each kept fix separately, with its before/after row in the message. Do not push, merge, deploy, or touch any cloud resource.
 Return the harness command, the full table, handoff notes and production asks.`,
-      { label: `execute:${p.lane}`, phase: 'Execute', schema: EXEC_SCHEMA, isolation: 'worktree' },
+      { label: `execute:${p.lane}`, phase: 'Execute', schema: EXEC_SCHEMA },
     ),
     (r, p) => r ? parallel(r.rows.filter(x => x.kept).map(row => () => agent(
       `${CTX}\n\nIndependent benchmark reproduction for lane ${p.lane}. You did not write this fix.

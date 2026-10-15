@@ -184,7 +184,7 @@ lose the report while the edits stay in the tree.
 | Challenge | `votes` per `D`/`C` mark | Each skeptic defends the test a different way: a contract only it catches, a CI route the absorber lacks, a retention-bar class. Each check is a sufficient defence, so a mark survives only if every skeptic says it stands; one defence reverts it to `R`, and uncertain verdicts go to `needs_human`. |
 | Layer | 1 per lane | Names the keeper suite per contract, the retired layers, the assertions to carry, the seams unlocked. |
 | Cutover | 1 per lane, then 1 serial owner | Only with `apply: true`. Lanes edit only their own test files, in parallel. Every production seam removal and shared-support edit goes through one serial agent afterwards, so two lanes never edit the same file. |
-| Preserve | 1 per lane + 1 mutation per restored contract, serially | Fresh reviewers compare deleted coverage to keepers; each restored contract gets a mutation that must turn its keeper red, then a byte-for-byte restore. Mutations edit production, so they run one at a time. |
+| Preserve | 1 per lane + 1 mutation per restored contract, serially | Fresh reviewers compare deleted coverage to keepers; each restored contract and every keeper contract gets a mutation that must turn its keeper red, then a byte-for-byte restore. Mutations edit production, so they run one at a time. |
 | Critic | 1 | Unmarked files, lanes without keepers, uncaught mutations, baseline failures without a follow-up. |
 
 Without `apply`, the result is the ledger and layer plans for the person to approve.

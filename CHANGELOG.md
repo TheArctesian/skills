@@ -3,6 +3,29 @@
 Workflow scripts return their `version`; bump it with any change to a skill's rules or script,
 and record eval scores here.
 
+## 2.3.0 — 2026-10-15
+
+Apply mode verified for two more skills, on eval fixtures with independent checks.
+
+- test-audit campaign (apply): the rewritten suite catches 4/4 production mutations, up from
+  3/4 (the non-member default had no real assertion); all 4 junk tests gone, including the
+  source grep, replaced by a floor-vs-round table row; suite green, no debris. 21 agents, 0.8M tokens.
+- code-quality (apply, 3 plan items): two dependency waves; the dependent item branched from
+  its dependency; each branch and all three merged pass the pinned `tsc` gate; target tree
+  clean, no worktrees left. Agents flagged their own intended behaviour changes for sign-off.
+  7 agents, 0.28M tokens.
+
+Fixes
+- code-quality and app-optimisation: apply/execute agents create their own git worktree inside
+  the target repo (under `.git/agent-worktrees/`). The Workflow tool's `isolation: 'worktree'`
+  isolates the session's repo, not `args.root`, so parallel items would have shared one tree.
+- test-audit: preservation mutates every keeper contract, not only restored gaps; the apply run
+  above ran zero skill-side mutations because no gap was restored.
+- Evals: test-audit apply runs are scored by production mutations the suite must catch; the
+  code-quality fixture pins TypeScript 5.9.3 with a lockfile and `setup.sh` installs it offline.
+
+Not yet verified: app-optimisation `execute` (needs a local Postgres and Python dependencies).
+
 ## 2.2.0 — 2026-10-15
 
 First apply-mode run (prune-comments, eval fixture): the edit path works end to end. Workers

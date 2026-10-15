@@ -80,7 +80,42 @@ def cupid(exp, res, _tree):
     }
 
 
-def tests(exp, res, _tree):
+def suite_passes(tree, cmd):
+    return subprocess.run(cmd, cwd=tree, capture_output=True, env={"PYTHONDONTWRITEBYTECODE": "1", "PATH": "/usr/bin:/bin:/opt/homebrew/bin"}).returncode == 0
+
+
+def mutation_score(exp, tree):
+    """Each mutation must turn the suite red; the source is restored byte for byte after each."""
+    caught = []
+    for m in exp["mutations"]:
+        f = tree / m["file"]
+        original = f.read_bytes()
+        assert m["from"].encode() in original, f"mutation {m['id']} no longer applies"
+        try:
+            f.write_bytes(original.replace(m["from"].encode(), m["to"].encode(), 1))
+            if not suite_passes(tree, exp["test_cmd"]):
+                caught.append(m["id"])
+        finally:
+            f.write_bytes(original)
+    return caught
+
+
+def tests(exp, res, tree):
+    if tree:
+        caught = mutation_score(exp, tree)
+        text = "\n".join(p.read_text() for p in (tree / "tests").rglob("*.py"))
+        junk_left = [t for t in exp.get("junk_tests", []) if f"def {t}(" in text]
+        green = suite_passes(tree, exp["test_cmd"])
+        return {
+            "recall": len(caught) / len(exp["mutations"]),
+            "keep": 1.0 if green else 0.0,
+            "false_positives": len(junk_left),
+            "mutations_caught": caught,
+            "mutations_missed": [m["id"] for m in exp["mutations"] if m["id"] not in caught],
+            "junk_left": junk_left,
+            "suite_green": green,
+        }
+
     marks = [m for p in res.get("plans") or [] for m in p.get("marks") or []]
 
     def mark_of(e):

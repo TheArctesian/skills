@@ -19,7 +19,7 @@ export const meta = {
 //         profile?, plan?, base?, reserve_tokens? }
 // Audit without confirmed: true stops after Profile + Measure and returns an estimate; re-run with confirmed: true and
 // resumeFromRunId so those phases come from cache.
-const VERSION = '2.2.0'
+const VERSION = '2.3.0'
 const A = args || {}
 if (!A.skill_dir) throw new Error('args.skill_dir is required: the code-quality skill directory')
 const SKILL = `${A.skill_dir}/SKILL.md`
@@ -142,19 +142,24 @@ if ((A.mode || 'audit') === 'apply') {
       wave,
       item => {
         const deps = (item.depends_on || []).filter(d => branchOf[d])
-        const base = deps.length ? `branch ${branchOf[deps[0]]}${deps.length > 1 ? `, then merge ${deps.slice(1).map(d => branchOf[d]).join(', ')} into it` : ''}` : `${A.base || 'HEAD'}`
+        const baseRef = deps.length ? branchOf[deps[0]] : (A.base || 'HEAD')
+        const mergeNote = deps.length > 1 ? `\nThen merge ${deps.slice(1).map(d => branchOf[d]).join(', ')} into your branch before starting.` : ''
         if (!canSpend(`apply ${item.slug}`)) return null
         return agent(
           `${CONTEXT}
 
-Apply one approved CUPID refactor in this isolated worktree. Create branch cupid/${item.slug} from ${base}.
+Apply one approved CUPID refactor. Work in your own git worktree of the target repository, never its main working tree (other items run in parallel):
+  wt="$(git rev-parse --path-format=absolute --git-common-dir)/agent-worktrees/cupid/${item.slug}"
+  git worktree add "$wt" -b cupid/${item.slug} ${baseRef}
+then cd "$wt" for every edit and command. After committing, run git worktree remove "$wt" (the branch stays).
+${mergeNote}
 Item: ${JSON.stringify(item)}
 Read every file and its callers first; move code verbatim before changing anything; keep public paths stable with
 re-exports where callers are many; name new folders and files for the domain; no behaviour change.
 Run the gates: ${JSON.stringify(gatesFor(item.files || []))}. If the repo has a shrink-only baseline
 (${profile.baseline || 'none found'}), lower entries for files that improved. Commit on the branch with a message naming
 the property and the seam. Do not push or merge. If the item turns out wrong on reading, skip it and say why.`,
-          { label: `apply:${item.slug}`, phase: 'Apply', schema: APPLY_SCHEMA, isolation: 'worktree' },
+          { label: `apply:${item.slug}`, phase: 'Apply', schema: APPLY_SCHEMA },
         )
       },
       (r, item) => {

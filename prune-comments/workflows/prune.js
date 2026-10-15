@@ -17,7 +17,7 @@ export const meta = {
 //         shard_size?, max_comment_lines?, rounds?, runner?, profile?, reserve_tokens? }
 // Without confirmed: true the run stops after Profile + Inventory and returns an estimate. Re-run with the
 // same args plus confirmed: true and resumeFromRunId so those phases come from cache.
-const VERSION = '2.2.0'
+const VERSION = '2.3.0'
 const A = args || {}
 if (!A.skill_dir) throw new Error('args.skill_dir is required: the prune-comments skill directory')
 const SKILL = `${A.skill_dir}/SKILL.md`

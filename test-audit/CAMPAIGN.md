@@ -95,7 +95,7 @@ assertions that cannot fail, such as a rejection row the production code never
 reaches. The earlier campaign's review found nine real gaps and one
 unreachable assertion.
 
-For each restored contract, make one deliberate **mutation** of the production
+For each restored contract and each keeper's contract, make one deliberate **mutation** of the production
 owner and confirm the keeper goes red. Then restore the source byte for byte
 and confirm `git diff` on that file is empty.
 

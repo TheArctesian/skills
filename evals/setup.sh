@@ -10,6 +10,8 @@ cp -R "$src/." "$dest/"
 git -C "$dest" init -q
 git -C "$dest" add -A
 git -C "$dest" -c user.email=eval@example.invalid -c user.name=eval commit -qm fixture
+# Fixtures with a package.json pin their toolchain; install it from the local Bun cache, never the network.
+if [ -f "$dest/package.json" ]; then (cd "$dest" && bun install --offline --frozen-lockfile >/dev/null) || { echo "offline install failed" >&2; exit 3; }; fi
 script=$(ls "$here/../$skill/workflows/"*.js)
 cat <<EOF
 Fixture ready: $dest

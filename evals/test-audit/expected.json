@@ -1,15 +1,99 @@
 {
   "skill": "test-audit",
   "must_flag": [
-    {"file": "tests/test_pricing.py", "test": "test_member_discount_again", "marks": ["C", "D"]},
-    {"file": "tests/test_pricing.py", "test": "test_is_member_private", "marks": ["C", "D"]},
-    {"file": "tests/test_pricing.py", "test": "test_price_runs", "marks": ["D", "F"]},
-    {"file": "tests/test_pricing.py", "test": "test_format_matches_itself", "marks": ["D", "F"]},
-    {"file": "tests/test_pricing.py", "test": "test_source_uses_floor_division", "marks": ["D", "C"]}
+    {
+      "file": "tests/test_pricing.py",
+      "test": "test_member_discount_again",
+      "marks": [
+        "C",
+        "D"
+      ]
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "test": "test_is_member_private",
+      "marks": [
+        "C",
+        "D"
+      ]
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "test": "test_price_runs",
+      "marks": [
+        "D",
+        "F"
+      ]
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "test": "test_format_matches_itself",
+      "marks": [
+        "D",
+        "F"
+      ]
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "test": "test_source_uses_floor_division",
+      "marks": [
+        "D",
+        "C"
+      ]
+    }
   ],
   "must_keep": [
-    {"file": "tests/test_pricing.py", "test": "test_member_discount_rounds_down"},
-    {"file": "tests/test_pricing.py", "test": "test_negative_price_rejected"},
-    {"file": "tests/test_pricing.py", "test": "test_format_price_pounds"}
+    {
+      "file": "tests/test_pricing.py",
+      "test": "test_member_discount_rounds_down"
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "test": "test_negative_price_rejected"
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "test": "test_format_price_pounds"
+    }
+  ],
+  "test_cmd": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests"
+  ],
+  "mutations": [
+    {
+      "id": "round-not-floor",
+      "file": "shop/pricing.py",
+      "from": "base_pence * 9 // 10",
+      "to": "round(base_pence * 0.9)"
+    },
+    {
+      "id": "negative-guard-off-by-one",
+      "file": "shop/pricing.py",
+      "from": "if base_pence < 0:",
+      "to": "if base_pence < -1:"
+    },
+    {
+      "id": "non-member-gets-discount",
+      "file": "shop/pricing.py",
+      "from": "customer.get(\"member\", False)",
+      "to": "customer.get(\"member\", True)"
+    },
+    {
+      "id": "one-decimal-place",
+      "file": "shop/pricing.py",
+      "from": ":.2f",
+      "to": ":.1f"
+    }
+  ],
+  "junk_tests": [
+    "test_member_discount_again",
+    "test_is_member_private",
+    "test_format_matches_itself",
+    "test_source_uses_floor_division"
   ]
 }
