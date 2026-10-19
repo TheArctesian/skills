@@ -159,6 +159,11 @@ Workflow({
 })
 ```
 
+If Workflow refuses the `scriptPath` because it is outside the directories this session can read, the skills checkout
+is not an added directory (see the repository README). Read the script once and pass its full text as `script`
+instead, with the same args; the result returns a `scriptPath` under the session directory, which the confirmed
+relaunch reuses.
+
 ### Estimate, confirm, run, save
 
 Every launch is two calls. The first returns `stage: "estimate"` after only the cheap

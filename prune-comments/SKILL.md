@@ -151,6 +151,11 @@ Workflow({
 })
 ```
 
+If Workflow refuses the `scriptPath` because it is outside the directories this session can read, the skills checkout
+is not an added directory (see the repository README). Read the script once and pass its full text as `script`
+instead, with the same args; the result returns a `scriptPath` under the session directory, which the confirmed
+relaunch reuses.
+
 Start in `audit` mode: workers return a proposal per comment and the reviewers grade the
 proposals, so the person sees what would go before anything changes. Switch to `apply`
 when they approve, for the whole scope or a component at a time.

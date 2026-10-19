@@ -10,6 +10,23 @@ some skills i rly like
 | [app-optimisation](app-optimisation/SKILL.md) | Measured performance lanes, benchmark-before-and-after, one-PR-at-a-time landing | `workflows/lanes.js` |
 | [persona-test](persona-test/SKILL.md) | Synthetic-persona usability tests: blinded agents drive the real web or iOS UI, findings reproduced and checked against the screen | `workflows/personas.js` |
 
+## Install
+
+```sh
+git clone <this repo> ~/Scripts/Personal/skills
+~/Scripts/Personal/skills/install.sh          # --remove to undo
+```
+
+`install.sh` symlinks each skill folder into `~/.claude/skills/` and the persona-test agents into
+`~/.claude/agents/`, so edits in the checkout are live. Then:
+
+1. Add the checkout to the directories every session may read, once, in `~/.claude/settings.json`:
+   `"permissions": { "additionalDirectories": ["/path/to/checkout"] }`. The Workflow tool loads a `scriptPath`
+   only from a readable directory; without this a session in another project must paste the script inline.
+2. Start a new Claude Code session, so the skills and agents are registered.
+3. For persona-test: Node (`npx`), and Xcode with simulators for iOS. Agents cannot come from a plugin, because
+   plugin agents ignore `mcpServers`.
+
 ## How the workflows are built
 
 Every skill ships a [Workflow](https://code.claude.com) script that the skill tells Claude to
