@@ -11,6 +11,9 @@ each and no CLAUDE.md, so they cannot read the code; they install into `~/.claud
 `mcpServers`. Personas are built from limits the harness enforces; wrong-turn and backtrack limits are applied from the
 log; findings need both a reproduction by a different agent and a screen-evidence check. Not yet run against its eval.
 
+Vendored skill: apple-fluid-design, emilkowalski/skills@2d22863 `apple-design` renamed to avoid a clash (MIT; source in
+`apple-fluid-design/LICENSE` and `UPSTREAM`). Guidance only, no workflow.
+
 ## 2.4.0 — 2026-10-15
 
 app-optimisation `execute` verified on the eval fixture against a throwaway local Postgres 17: the

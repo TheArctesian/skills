@@ -1,0 +1,4 @@
+Vendored from https://github.com/emilkowalski/skills/tree/2d228630ba1446365f614a108cb8252f1feda202/skills/apple-design
+(MIT, Emil Kowalski; see LICENSE). One change: frontmatter name apple-design -> apple-fluid-design, because
+dickwu/apple-design-skill (an HIG reviewer) already uses that name. To update: copy SKILL.md from a newer commit,
+reapply the rename, bump the hash.

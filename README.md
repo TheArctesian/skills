@@ -9,6 +9,7 @@ some skills i rly like
 | [test-audit](test-audit/SKILL.md) | Authoring gate, audit and campaign for low-value or implementation-coupled tests | `workflows/test-audit.js` |
 | [app-optimisation](app-optimisation/SKILL.md) | Measured performance lanes, benchmark-before-and-after, one-PR-at-a-time landing | `workflows/lanes.js` |
 | [persona-test](persona-test/SKILL.md) | Synthetic-persona usability tests: blinded agents drive the real web or iOS UI, findings reproduced and checked against the screen | `workflows/personas.js` |
+| [apple-fluid-design](apple-fluid-design/SKILL.md) | Apple's fluid-interface and motion principles for the web (springs, gestures, materials, type). Vendored from [emilkowalski/skills](https://github.com/emilkowalski/skills), MIT | none (guidance only) |
 
 ## Install
 
