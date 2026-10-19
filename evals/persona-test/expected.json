@@ -1,0 +1,19 @@
+{
+  "skill": "persona-test",
+  "tasks": [
+    "Buy a bag of basmati rice and have it delivered to 12 Harbour Street, Leith EH6 6LX",
+    "You are moving house: make sure future grocery deliveries come to 8 Mill Lane, Leith EH6 5QR"
+  ],
+  "planted": [
+    { "id": "cart-no-name", "screens": ["fresh this week", "shop", "basket", "header", "home"], "keywords": ["cart", "basket", "unlabel", "no name", "accessible name", "icon"] },
+    { "id": "checkout-clears", "screens": ["checkout"], "keywords": ["clear", "wipe", "erase", "reset", "lost", "emptied", "re-enter", "retype"] },
+    { "id": "fulfilment-jargon", "screens": ["fulfilment", "shop", "fresh this week", "header", "nav", "account", "profile"], "keywords": ["fulfilment", "fulfillment", "consignment"] },
+    { "id": "save-silent", "screens": ["fulfilment", "profile", "account"], "keywords": ["feedback", "confirm", "no message", "nothing happen", "silent", "no indication", "saved"] },
+    { "id": "promo-covers-button", "screens": ["checkout"], "keywords": ["cover", "overlap", "obscur", "behind", "promo", "banner", "bar", "intercept"] }
+  ],
+  "decoys": [
+    { "id": "country-select", "kind": "ai-only", "screens": ["checkout"], "keywords": ["country", "countries", "dropdown"] },
+    { "id": "decorative-leaf", "kind": "fine", "screens": ["fresh this week", "shop"], "keywords": ["leaf", "decorative"] },
+    { "id": "offers-switch", "kind": "fine", "screens": ["checkout"], "keywords": ["switch", "toggle", "offers", "newsletter"] }
+  ]
+}

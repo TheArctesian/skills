@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Checkout · Larder</title><link rel="stylesheet" href="style.css"></head>
+<body><header><strong>Larder</strong><nav><a href="index.html">Shop</a><a href="account.html">Fulfilment profile</a><a href="help.html">Help</a></nav><a class="cart" href="cart.html"><svg viewBox="0 0 24 24"><path d="M3 4h2l2 11h11l2-8H6" fill="none" stroke="#222" stroke-width="2"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg><span class="badge" id="count"></span></a></header>
+<main>
+<h1>Checkout</h1>
+<p>We deliver to your door and you pay when it arrives.</p>
+<p class="error" id="err" role="alert"></p>
+<form id="checkout">
+<label>Full name <input name="name" autocomplete="name"></label>
+<label>Address <input name="address" autocomplete="street-address"></label>
+<label>Postcode <input name="postcode" autocomplete="postal-code"></label>
+<label>Phone <input name="phone" autocomplete="tel"></label>
+<label>Country <select name="country" id="country"></select></label>
+<div class="switch"><button type="button" role="switch" aria-checked="false" id="news">Off</button><span id="news-label">Email me weekly offers</span></div>
+<button type="submit">Place order</button>
+</form>
+<div class="promo">Free delivery on orders over £40. <a href="index.html">Keep shopping</a></div>
+</main>
+<script src="app.js"></script></body></html>

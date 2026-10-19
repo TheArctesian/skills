@@ -9,6 +9,7 @@ skill has a small fixture repository with planted answers and a deterministic sc
 | code-quality | 7 CUPID problems across P, C, D and I; two clean files that must draw no finding | recall ≥ 0.8 with the right property, 0 findings on clean files |
 | test-audit | 5 junk tests (duplicate, private predicate, assertion-free, self-comparison, source grep); 3 real contract tests | recall ≥ 0.8, all 3 kept |
 | app-optimisation | 4 real gaps (oldest-N window, N+1, connection per call, migrations at boot); 1 decoy that is already cached | recall ≥ 0.8, decoy not confirmed |
+| persona-test | A static shop with 5 usability problems (unlabelled icon-only cart, checkout form wiped on error, delivery address under "Fulfilment profile", silent Save, promo bar covering "Place order" on phones); 3 decoys (a long country select only an agent struggles with, correctly hidden decorative icons, a labelled switch) | recall ≥ 0.8, no decoy confirmed, report free of population claims |
 
 ## Run one
 
@@ -42,6 +43,9 @@ skill's judgement is unstable, not that the code got worse.
 - After a model upgrade.
 - When a real run surprised you: add the surprising case to the fixture and `expected.json`
   first, then fix the skill until it passes.
+
+persona-test drives a browser, so its fixture is served rather than read: the setup output says how, and the
+tasks to pass are in `persona-test/expected.json`. Install its agents first (`persona-test/scripts/install-agents.sh`).
 
 Record each score with the skill `version` in `CHANGELOG.md` when it changes. Fixtures are
 deliberately tiny so a run costs a few dozen agents; they measure judgement, not scale.

@@ -3,6 +3,14 @@
 Workflow scripts return their `version`; bump it with any change to a skill's rules or script,
 and record eval scores here.
 
+## 2.5.0 — unreleased
+
+New skill: persona-test. Synthetic-persona usability testing for web (Playwright MCP) and iOS (mobile-mcp on
+simulators). Persona agents are custom agent types whose tool allowlist is only their driver, with a private MCP server
+each and no CLAUDE.md, so they cannot read the code; they install into `~/.claude/agents` because plugin agents ignore
+`mcpServers`. Personas are built from limits the harness enforces; wrong-turn and backtrack limits are applied from the
+log; findings need both a reproduction by a different agent and a screen-evidence check. Not yet run against its eval.
+
 ## 2.4.0 — 2026-10-15
 
 app-optimisation `execute` verified on the eval fixture against a throwaway local Postgres 17: the

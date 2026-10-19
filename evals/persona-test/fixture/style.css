@@ -1,0 +1,17 @@
+body { font: 16px/1.5 system-ui, sans-serif; margin: 0; color: #222; background: #fff; }
+header { display: flex; align-items: center; gap: 1.5rem; padding: .75rem 1rem; border-bottom: 1px solid #ddd; }
+header nav a { margin-right: 1rem; color: #225; }
+.cart { margin-left: auto; position: relative; display: inline-flex; }
+.cart svg { width: 28px; height: 28px; }
+.badge { position: absolute; top: -6px; right: -8px; background: #c33; color: #fff; border-radius: 9px; font-size: 12px; padding: 0 5px; }
+main { padding: 1rem; max-width: 40rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: 1rem; }
+.card { border: 1px solid #ddd; border-radius: 8px; padding: .75rem; }
+label { display: block; margin-top: .75rem; }
+input, select { font: inherit; padding: .4rem; width: 100%; box-sizing: border-box; }
+button { font: inherit; padding: .5rem 1rem; margin-top: 1rem; }
+.error { color: #b00; }
+.promo { position: fixed; left: 0; right: 0; bottom: 0; height: 96px; background: #fde68a; padding: 1rem; display: none; }
+@media (max-width: 600px) { .promo { display: block; } }
+.switch { display: flex; align-items: center; gap: .5rem; margin-top: .75rem; }
+.switch button { margin: 0; width: 3rem; }

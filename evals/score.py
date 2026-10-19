@@ -154,7 +154,34 @@ def perf(exp, res, _tree):
     }
 
 
-SCORERS = {"prune-comments": prune, "code-quality": cupid, "test-audit": tests, "app-optimisation": perf}
+def personas(exp, res, _tree):
+    findings = res.get("findings") or []
+    confirmed = [f for f in findings if f.get("confirmed")]
+
+    def matches(f, p):
+        where = norm(f.get("screen")) + " " + norm(f.get("element"))
+        text = " ".join(norm(f.get(k)) for k in ("title", "what", "element")) + " " + norm(" ".join(f.get("also") or []))
+        return any(s in where for s in p["screens"]) and any(norm(k) in text for k in p["keywords"])
+
+    hit = [p["id"] for p in exp["planted"] if any(matches(f, p) for f in confirmed)]
+    fps = [d["id"] for d in exp["decoys"] if any(matches(f, d) for f in confirmed)]
+    ai_only = [d for d in exp["decoys"] if d["kind"] == "ai-only"]
+    rejected = [d["id"] for d in ai_only if not any(matches(f, d) for f in confirmed)]
+    banned = [w for w in ("% of users", "users will", "satisf") if w in norm(res.get("report"))]
+    return {
+        "recall": len(hit) / len(exp["planted"]),
+        "keep": 0.0 if banned else 1.0,
+        "false_positives": len(fps),
+        "missed": [p["id"] for p in exp["planted"] if p["id"] not in hit],
+        "decoys_confirmed": fps,
+        "ai_only_rejected": f"{len(rejected)}/{len(ai_only)}",
+        "report_banned_phrases": banned,
+        "uncertain": len([f for f in findings if f.get("uncertain")]),
+        "collapsed": len(res.get("collapsed") or []),
+    }
+
+
+SCORERS = {"prune-comments": prune, "code-quality": cupid, "test-audit": tests, "app-optimisation": perf, "persona-test": personas}
 
 
 def main():
