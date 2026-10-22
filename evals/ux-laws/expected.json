@@ -1,0 +1,447 @@
+{
+  "skill": "ux-laws",
+  "clean_files": [
+    "src/routes/Help.tsx"
+  ],
+  "max_findings": 60,
+  "planted": [
+    {
+      "id": "button-icon-20px",
+      "law": [
+        "fitts"
+      ],
+      "files": [
+        "src/ui/Button.tsx",
+        "src/routes/Appointments.tsx"
+      ],
+      "keywords": [
+        "hit area",
+        "target size",
+        "tap target",
+        "touch target",
+        "20px",
+        "20 px",
+        "20x20",
+        "20\u00d720",
+        "under 24",
+        "smaller than 24",
+        "below 24",
+        "2.5.8"
+      ],
+      "proof": [
+        "20",
+        "16"
+      ],
+      "note": "icon size = p-0.5 (2px a side) + size-4 glyph (16px) = 20x20. The two row actions sit in a flex gap-0, so 24px circles centred on them intersect and the WCAG 2.5.8 Spacing exception does NOT rescue it: this is a real AA failure, and the destructive Cancel is flush against the confirming Print"
+    },
+    {
+      "id": "clinic-list-eleven",
+      "law": [
+        "hicks",
+        "choice-overload"
+      ],
+      "files": [
+        "src/routes/Booking.tsx"
+      ],
+      "keywords": [
+        "eleven",
+        "no default",
+        "no grouping",
+        "ungrouped",
+        "flat list",
+        "no search",
+        "nearest",
+        "recommend",
+        "all equally"
+      ],
+      "note": "eleven flat radio options, no default, no grouping, no search, no distance or recommendation"
+    },
+    {
+      "id": "no-step-indicator",
+      "law": [
+        "goal-gradient"
+      ],
+      "flow": true,
+      "files": [
+        "src/routes/Booking.tsx",
+        "src/routes/Details.tsx",
+        "src/routes/Confirm.tsx",
+        "src/main.tsx"
+      ],
+      "keywords": [
+        "step",
+        "progress",
+        "how many",
+        "how much is left",
+        "how far",
+        "position",
+        "remaining",
+        "of three"
+      ],
+      "note": "three-step booking flow with no visible position or total on any step"
+    },
+    {
+      "id": "booking-no-resume",
+      "law": [
+        "zeigarnik"
+      ],
+      "flow": true,
+      "files": [
+        "src/routes/Booking.tsx",
+        "src/routes/Details.tsx",
+        "src/routes/Confirm.tsx",
+        "src/main.tsx"
+      ],
+      "keywords": [
+        "draft",
+        "resume",
+        "persist",
+        "abandon",
+        "partial",
+        "start again",
+        "from the beginning",
+        "lost progress",
+        "come back"
+      ],
+      "note": "nothing in the three-step flow is persisted; leaving loses everything and there is no resume"
+    },
+    {
+      "id": "phone-regex-strict",
+      "law": [
+        "postels",
+        "teslers"
+      ],
+      "files": [
+        "src/routes/Details.tsx"
+      ],
+      "keywords": [
+        "phone",
+        "mobile",
+        "space",
+        "plus",
+        "+44",
+        "bracket",
+        "normalis",
+        "normaliz",
+        "strip",
+        "reject"
+      ],
+      "note": "/^\\d{11}$/ rejects spaces, brackets and +44, all of which could be normalised"
+    },
+    {
+      "id": "placeholder-only-labels",
+      "law": [
+        "recognition-recall"
+      ],
+      "files": [
+        "src/routes/Details.tsx"
+      ],
+      "keywords": [
+        "placeholder",
+        "no label",
+        "unlabelled",
+        "unlabeled",
+        "disappear",
+        "vanish",
+        "autocomplete"
+      ],
+      "note": "name and phone have a placeholder and no label, while the Field component three lines below does it correctly"
+    },
+    {
+      "id": "form-wiped-on-error",
+      "law": [
+        "feedback-loops",
+        "error-prevention"
+      ],
+      "files": [
+        "src/routes/Details.tsx"
+      ],
+      "keywords": [
+        "wipe",
+        "clear",
+        "reset",
+        "lost",
+        "emptied",
+        "re-enter",
+        "retype",
+        "discard",
+        "start over"
+      ],
+      "note": "a failed validation resets every field, including the ones that were valid"
+    },
+    {
+      "id": "confirm-silent",
+      "law": [
+        "doherty",
+        "feedback-loops",
+        "peak-end"
+      ],
+      "files": [
+        "src/routes/Confirm.tsx"
+      ],
+      "keywords": [
+        "pending",
+        "loading",
+        "spinner",
+        "nothing happens",
+        "no feedback",
+        "twice",
+        "double",
+        "in flight",
+        "silent",
+        "no acknowledg",
+        "receipt",
+        "reference",
+        "end state",
+        "unchecked",
+        "r.ok"
+      ],
+      "note": "book() awaits a POST with no pending state, never checks r.ok so a failure navigates away as a silent success, and a successful booking lands on the list with no confirmation or reference. One cluster on one button, so it is one plant"
+    },
+    {
+      "id": "confirm-drops-context",
+      "law": [
+        "working-memory",
+        "mental-model"
+      ],
+      "files": [
+        "src/routes/Confirm.tsx"
+      ],
+      "keywords": [
+        "your chosen date",
+        "hardcoded",
+        "hard-coded",
+        "literal",
+        "does not show",
+        "never shown",
+        "which clinic",
+        "what they chose",
+        "not carried",
+        "placeholder text"
+      ],
+      "note": "the check-and-book step renders the literal string 'your chosen date' and a hardcoded clinic, so the step that confirms the booking does not show what is being confirmed"
+    },
+    {
+      "id": "raw-error-and-id",
+      "law": [
+        "cognitive-load",
+        "mental-model"
+      ],
+      "files": [
+        "src/routes/Account.tsx"
+      ],
+      "keywords": [
+        "econnrefused",
+        "http",
+        "patient_id",
+        "patient_record",
+        "internal",
+        "jargon",
+        "transport",
+        "table name",
+        "what to do",
+        "status code"
+      ],
+      "note": "the error text is a transport failure and a table name; the page labels a field patient_id"
+    },
+    {
+      "id": "settings-flat-fourteen",
+      "law": [
+        "progressive-disclosure",
+        "chunking",
+        "hicks"
+      ],
+      "files": [
+        "src/routes/Settings.tsx"
+      ],
+      "keywords": [
+        "fourteen",
+        "section",
+        "grouping",
+        "ungrouped",
+        "heading",
+        "undivided",
+        "flat",
+        "one list",
+        "sharing",
+        "scan"
+      ],
+      "note": "fourteen toggles in one undivided list spanning reminders, data sharing and accessibility"
+    },
+    {
+      "id": "label-gap-inverted",
+      "law": [
+        "proximity"
+      ],
+      "files": [
+        "src/ui/Field.tsx"
+      ],
+      "keywords": [
+        "closer",
+        "further",
+        "farther",
+        "belongs to",
+        "reads with",
+        "field above",
+        "between fields",
+        "wider than",
+        "twice"
+      ],
+      "proof": [
+        "16",
+        "8"
+      ],
+      "note": "a label sits 16px from its own input while fields are 8px apart, so each label reads as belonging to the field above"
+    },
+    {
+      "id": "no-error-boundary",
+      "law": [
+        "peak-end",
+        "aesthetic-usability"
+      ],
+      "files": [
+        "src/main.tsx"
+      ],
+      "keywords": [
+        "error boundary",
+        "errorelement",
+        "default error",
+        "framework error",
+        "router error",
+        "unstyled",
+        "white screen",
+        "crash",
+        "catch-all"
+      ],
+      "note": "the router defines no errorElement and no catch-all route, so any failure on the main path renders react-router's default error page"
+    },
+    {
+      "id": "wrong-autocomplete-token",
+      "law": [
+        "teslers",
+        "error-prevention",
+        "recognition-recall"
+      ],
+      "files": [
+        "src/routes/Details.tsx"
+      ],
+      "keywords": [
+        "bday",
+        "birthday",
+        "date of birth",
+        "wrong token",
+        "wrong field",
+        "autocomplete"
+      ],
+      "note": "autoComplete=\"bday\" sits on the Preferred date field, so the browser offers the person's date of birth as the appointment date \u2014 a valid-looking ISO date that passes validation and books the wrong day. Meanwhile name and phone, which do have tokens, have none"
+    }
+  ],
+  "decoys": [
+    {
+      "id": "nav-seven",
+      "kind": "cargo-cult",
+      "law": [
+        "hicks",
+        "millers",
+        "chunking"
+      ],
+      "files": [
+        "src/nav.tsx"
+      ],
+      "keywords": [
+        "seven",
+        "7\u00b12",
+        "plus or minus",
+        "too many nav",
+        "nav items",
+        "navigation has",
+        "over-group",
+        "fragment"
+      ],
+      "note": "five links in two labelled groups with a documented landing route; a finding here is the 7-plus-or-minus-2 reflex, or the mirror-image claim that two groups over-fragment five links"
+    },
+    {
+      "id": "iso-date",
+      "kind": "documented",
+      "law": [
+        "postels",
+        "teslers",
+        "jakobs"
+      ],
+      "files": [
+        "src/routes/Details.tsx",
+        "src/ui/Field.tsx"
+      ],
+      "keywords": [
+        "accept dd/mm",
+        "parse dd/mm",
+        "date picker",
+        "iso-only",
+        "iso only",
+        "lenient date",
+        "accept other date formats",
+        "guess the order"
+      ],
+      "note": "AGENTS.md documents the ISO-only date as deliberate, justifies the rejection specifically (a withdrawn lenient-parsing trial that mis-booked three appointments) and cites docs/research/2025-03-diary-study.md, which exists and says the same. Documented research overrides the law. Keywords must name changing the date FORMAT or ORDER: a finding that only trims whitespace, or that fixes the wrong autocomplete token, respects the decision and is correct"
+    },
+    {
+      "id": "legacy-bar",
+      "kind": "unreachable",
+      "law": [
+        "fitts",
+        "recognition-recall",
+        "proximity"
+      ],
+      "files": [
+        "src/ui/LegacyIconBar.tsx"
+      ],
+      "keywords": [
+        "legacy",
+        "icon bar",
+        "toolbar"
+      ],
+      "note": "16px targets with no padding, and it IS imported by Appointments \u2014 but behind FEATURES.legacyToolbar, which is false with no runtime override. The reach check has to trace the flag, not just the import"
+    },
+    {
+      "id": "story-tiny",
+      "kind": "excluded",
+      "law": [
+        "fitts"
+      ],
+      "files": [
+        "src/ui/Button.stories.tsx"
+      ],
+      "keywords": [
+        "story",
+        "storybook",
+        "extrasmall",
+        "extra small",
+        "density experiment"
+      ],
+      "note": "a 16px variant that exists only in a Storybook story and is not in Button's Size union"
+    },
+    {
+      "id": "tooling-covered",
+      "kind": "linted",
+      "law": [
+        "jakobs",
+        "feedback-loops",
+        "recognition-recall"
+      ],
+      "files": [
+        "src/routes/Booking.tsx"
+      ],
+      "keywords": [
+        "clickable div",
+        "div with onclick",
+        "non-interactive",
+        "static element",
+        "not a button",
+        "keyboard handler",
+        "click-events-have-key-events"
+      ],
+      "note": "the 'Can't find your clinic?' div has an onClick. eslint.config.js enables jsx-a11y/no-static-element-interactions and click-events-have-key-events at error, and AGENTS.md says so, so the build already fails on it: re-reporting it by hand is the thing being scored against"
+    }
+  ],
+  "max_findings_note": "A padding tripwire, not a quality target, and measured rather than guessed. With clustering working, a full run on this fixture lands at 56 findings over 56 distinct screen+element pairs with only 2 residual duplicate pairs \u2014 that is what a thorough audit of a deliberately dense fixture looks like. 60 still catches the failure modes it exists for: the broken-clustering run produced 114, and a padded single-blob finding fails on recall long before this bar."
+}
