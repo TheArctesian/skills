@@ -6,7 +6,7 @@ mcpServers:
   - playwright:
       type: stdio
       command: npx
-      args: ["-y", "@playwright/mcp@latest", "--isolated", "--headless", "--viewport-size", "1280x800"]
+      args: ["-y", "@playwright/mcp@latest", "--isolated", "--headless", "--browser", "chromium", "--viewport-size", "1280x800"]
 omitClaudeMd: true
 maxTurns: 80
 ---

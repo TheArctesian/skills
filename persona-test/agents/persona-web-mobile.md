@@ -6,7 +6,7 @@ mcpServers:
   - playwright:
       type: stdio
       command: npx
-      args: ["-y", "@playwright/mcp@latest", "--isolated", "--headless", "--device", "iPhone 15"]
+      args: ["-y", "@playwright/mcp@latest", "--isolated", "--headless", "--browser", "chromium", "--device", "iPhone 15"]
 omitClaudeMd: true
 maxTurns: 80
 ---
