@@ -4,6 +4,7 @@
 import argparse
 import json
 import pathlib
+import re
 import subprocess
 import sys
 
@@ -181,7 +182,99 @@ def personas(exp, res, _tree):
     }
 
 
-SCORERS = {"prune-comments": prune, "code-quality": cupid, "test-audit": tests, "app-optimisation": perf, "persona-test": personas}
+def ux_laws(exp, res, _tree):
+    # polish (could-priority) findings are reported unverified rather than dropped, so they count for decoys and
+    # clean-file hits as much as verified ones; crediting them for plants too is deliberate, since a correctly
+    # identified problem rated "polish" is still found.
+    findings = (res.get("findings") or []) + (res.get("polish") or [])
+
+    def laws_of(f):
+        return [l for l in (f.get("laws") or [f.get("law")]) if l]
+
+    def prose(f):
+        # Keywords match the reviewer's own words only. Matching the whole JSON let one finding that listed every
+        # file and every law score every plant.
+        return " ".join(norm(f.get(k)) for k in ("what", "fix", "arithmetic", "measurement_needed", "tradeoff")) \
+            + " " + norm(" ".join(f.get("also") or []))
+
+    def hits_file(f, p, strict):
+        paths = [e.split(":")[0].strip() for e in (f.get("evidence") or [])] + [f.get("shared_component") or ""]
+        if any(same_file(e, c) for e in paths if e for c in p["files"]):
+            return True
+        if any(norm(c) in norm(ev) for ev in (f.get("evidence") or []) for c in p["files"]):
+            return True
+        if strict:
+            return False
+        # A journey finding names the flow, not a file, so it gets a name fallback — bounded by word boundaries, or
+        # "help text" in a proximity finding would read as a hit on Help.tsx.
+        where = " ".join(norm(f.get(k)) for k in ("screen", "element", "shared_component"))
+        return any(re.search(rf"\b{re.escape(pathlib.PurePath(c).stem.lower())}\b", where) for c in p["files"])
+
+    def matches(f, p, strict=False):
+        if not any(l in p["law"] for l in laws_of(f)):
+            return False
+        if not hits_file(f, p, strict or not p.get("flow")):
+            return False
+        if not any(norm(k) in prose(f) for k in p["keywords"]):
+            return False
+        # A computed plant is only scored when the finding shows the numbers it claims to have derived.
+        return all(n in prose(f) for n in p.get("proof", []))
+
+    # One finding may satisfy at most one plant: without this, a single blob naming every law and every file
+    # scored full recall.
+    hit, used = [], set()
+    for p in exp["planted"]:
+        for i, f in enumerate(findings):
+            if i not in used and matches(f, p):
+                hit.append(p["id"])
+                used.add(i)
+                break
+    fps = [d["id"] for d in exp["decoys"] if any(matches(f, d) for f in findings)]
+    refuted_decoys = [d["id"] for d in exp["decoys"] if any(matches(f, d) for f in (res.get("refuted") or []))]
+    unreachable = norm(json.dumps(res.get("unreachable") or []))
+    traced = [d["id"] for d in exp["decoys"] if d["kind"] in ("unreachable", "excluded")
+              and any(pathlib.PurePath(c).stem.lower() in unreachable for c in d["files"])]
+    # "On" a clean file means the problem is there, not that the file was cited for comparison: every real run quoted
+    # the help page beside a finding about another screen, and counting those failed correct audits.
+    def only_evidence_is(f, cands):
+        paths = [e.split(":")[0].strip() for e in (f.get("evidence") or [])]
+        code = [x for x in paths if re.search(r"\.(tsx?|jsx?|vue|svelte|html|css|swift|kt|dart)$", x)]
+        return bool(code) and all(any(same_file(x, c) for c in cands) for x in code)
+
+    on_clean = [f"{','.join(laws_of(f))} {f.get('screen')}" for f in findings
+                if only_evidence_is(f, exp["clean_files"])]
+    # A grade is a claim about evidence; a claim without its proof is the failure mode this skill exists to avoid.
+    # A grade the verifiers corrected is exempt: the correction happens after the author supplied the proof.
+    unproven = [f"{','.join(laws_of(f))} {f.get('screen')}: {f.get('grade')}"
+                for f in findings + (res.get("needs_measurement") or [])
+                if not f.get("grade_corrected_from")
+                and ((f.get("grade") == "computed" and not norm(f.get("arithmetic")))
+                     or (f.get("grade") == "needs_measurement" and not norm(f.get("measurement_needed"))))]
+    # Word boundaries: "does not satisfy SC 2.5.8" and "unit conversion" are correct prose, not population claims.
+    BANNED = (r"\b\d+\s?% of (users|people)", r"\busers will\b", r"\buser satisfaction\b",
+              r"\bsatisfaction (score|rating)", r"\bconversion (rate|lift|uplift)", r"\bengagement will\b")
+    banned = [b for b in BANNED if re.search(b, norm(res.get("report")))]
+    padded = len(findings) > exp.get("max_findings", 30)
+    return {
+        "recall": len(hit) / len(exp["planted"]),
+        "keep": 0.0 if (banned or padded) else 1.0,
+        "false_positives": len(fps),
+        "missed": [p["id"] for p in exp["planted"] if p["id"] not in hit],
+        "decoys_confirmed": fps,
+        "decoys_refuted": f"{len(refuted_decoys)}/{len(exp['decoys'])}",
+        "unreachable_traced": traced,
+        "findings_on_clean_files": on_clean,
+        "grades_without_proof": unproven,
+        "report_banned_phrases": banned,
+        "findings_total": len(findings),
+        "padded": padded,
+        "rules_ok": not on_clean and not unproven,
+        "needs_measurement": len(res.get("needs_measurement") or []),
+        "needs_human": len(res.get("needs_human") or []),
+    }
+
+
+SCORERS = {"prune-comments": prune, "code-quality": cupid, "test-audit": tests, "app-optimisation": perf, "persona-test": personas, "ux-laws": ux_laws}
 
 
 def main():

@@ -5,6 +5,66 @@ and record eval scores here.
 
 ## 2.5.0 — unreleased
 
+New skill: ux-laws. Audits an interface against 35 laws — 28 of the 30 on lawsofux.com (Cognitive Bias and Flow are
+framing rather than checks), plus visual hierarchy, progressive disclosure, recognition over recall, feedback loops and
+error prevention from Nielsen's heuristics, asymmetric choice for the deceptive-pattern class the others only point at,
+and ai-legibility from Microsoft's HAX guidelines and Google's PAIR guidebook for surfaces whose output is generated
+rather than authored. Grouped into five lenses so one reviewer holds one lens per shard; A–D run per shard of screens, E per flow. Two things shape it. First, a
+repository is not an interface, so every finding carries an evidence grade — `certain`, `computed` with the arithmetic
+shown, or `needs_measurement` with the one measurement that would settle it — and a verifier refutes rather than
+downgrades a claim stated above its grade. Second, the laws are the favourite weapon of bad design review, so each law
+entry carries its overcorrection and every finding must survive its law's name being deleted from the sentence.
+Verification runs three necessary checks: evidence, **reach** (does a person actually meet this, or is it dead code, a
+story or a flagged-off variant) and fit (right law, right fix, and section 4's conflict order). Shards are screens and
+flows rather than directories, because that is the unit every law is about; lens E runs per flow. An opt-in rendered
+lane (`measure: true`) measures geometry, contrast and timing against a locally served build, serially against one
+server, and promotes or refutes static claims.
+
+The five criteria new in WCAG 2.2 are reported under the laws that already own their mechanism rather than as new ids,
+which converts several bars from convention into conformance: SC 3.3.7 Redundant Entry (A) makes re-keying a value the
+system already holds a Level A failure under `teslers`/`recognition-recall`; SC 3.2.6 Consistent Help (A) sits under
+`jakobs`; SC 2.5.7 Dragging Movements and SC 2.4.11 Focus Not Obscured (both AA) under `fitts`; SC 3.3.8 Accessible
+Authentication (AA) under `recognition-recall`, which makes a blocked paste or a defeated password manager a
+conformance failure rather than an opinion.
+
+Run against its eval twice. **First run**: 381 agents, 14.4M tokens, 109 findings — recall 13/13 with the right law,
+no decoy confirmed, every cited line verbatim, all 12 computed arithmetics correct on independent recomputation, and
+all three fixture traps caught (the flagged-off component excluded by tracing the flag rather than the import, the
+clickable div suppressed as already failing a named enabled lint rule, the documented clinical-safety decision upheld
+against three separate findings). Three defects that run exposed, all since fixed:
+
+- **80 of 114 findings were duplicates.** Clustering keyed on exact screen-string equality, and the map labelled one
+  screen `settings-list` in a shard and `Settings (/account/settings)` in a flow, so one problem drew three independent
+  juries — three times the verification cost, the same finding shipped at two different evidence grades, and once
+  refuted by one jury while another reported it as a `must`. Four candidate keys were measured rather than guessed; the
+  one that merges on law plus `file:line` removes the duplicates and keeps recall at 1.0, while the lens-based key that
+  deduplicated hardest collapsed three distinct journey problems into one and dropped recall to 0.85.
+- **The estimate understated the run 18.9×** — 23 agents shown against 381 spent, because verification (90% of the run)
+  appeared only as a prose note and the critic's gap round was uncapped. The estimate now reports `already_spent`,
+  `before_verify`, `verify_max` and `total_max`, and gap passes are capped.
+- **A refutation did not bind the deliverable.** Verification caught the documented-decision trap three times and the
+  plan merge put the refuted fix back as a step inside an otherwise-sound item, so report and plan told an implementer
+  opposite things about a change the fixture records as having mis-booked three clinical appointments. Refutations are
+  now passed to the plan as a do-not-resurrect list, and a later lens re-raising a refuted claim goes to `needs_human`
+  rather than getting a second jury. `needs_human` itself was unreachable by construction (0 of 342 verdicts were ever
+  `uncertain`); it is now a verdict that outranks refutation.
+
+**Second run**, with the clustering fix, resumed from cache: 198 agents, 6.7M tokens, 56 findings over 56 distinct
+screen+element pairs with 2 residual duplicate pairs. **Passes**: recall 14/14, 0 decoys confirmed, 0 findings on the
+clean screen, 0 grades without their proof, no population claims. Caveats: this run predates the single global
+verify barrier, and its plan and report agents hit a session limit, so plan and report quality were scored from the
+first run only.
+
+Reviewed before release by a four-agent council (UX substance, repository conventions, workflow engineering, eval
+adversary) and corrected: the WCAG 2.5.8 Spacing exception was missing, so undersized-but-separated targets would have
+been reported as AA failures at `must`; heading order and reduced motion were cited as conformance when they are best
+practice and AAA; Parkinson's Law claimed an effect it does not predict; the choice-overload entry cited Iyengar &
+Lepper without Scheibehenne's near-zero meta-analytic replication; the clustering key merged every finding naming the
+same shared component into one, so the second was never verified or reported; `claim` mutated findings already
+returned; the rendered lane never promoted or refuted the measurements it exists to take; and `measure: true` would
+have driven a clicking browser against any `target`, production included. The eval was rebuilt after the adversarial
+reviewer scored a single padded finding at recall 1.0 and showed six ways a correct audit failed. Not yet run.
+
 New skill: persona-test. Synthetic-persona usability testing for web (Playwright MCP) and iOS (mobile-mcp on
 simulators). Persona agents are custom agent types whose tool allowlist is only their driver, with a private MCP server
 each and no CLAUDE.md, so they cannot read the code; they install into `~/.claude/agents` because plugin agents ignore

@@ -9,6 +9,7 @@ some skills i rly like
 | [test-audit](test-audit/SKILL.md) | Authoring gate, audit and campaign for low-value or implementation-coupled tests | `workflows/test-audit.js` |
 | [app-optimisation](app-optimisation/SKILL.md) | Measured performance lanes, benchmark-before-and-after, one-PR-at-a-time landing | `workflows/lanes.js` |
 | [persona-test](persona-test/SKILL.md) | Synthetic-persona usability tests: blinded agents drive the real web or iOS UI, findings reproduced and checked against the screen | `workflows/personas.js` |
+| [ux-laws](ux-laws/SKILL.md) | Audits an interface against 35 laws of UX from source, grading every finding by how certain its evidence is; optional rendered measurement | `workflows/ux-laws.js` |
 | [apple-fluid-design](apple-fluid-design/SKILL.md) | Apple's fluid-interface and motion principles for the web (springs, gestures, materials, type). Vendored from [emilkowalski/skills](https://github.com/emilkowalski/skills), MIT | none (guidance only) |
 
 ## Install
@@ -87,4 +88,8 @@ Each of these came from a failed eval run, not from design up front:
   own Postgres cluster to escape. Anything load- or state-sensitive runs serially on its own resources,
   and every agent stops what it starts.
 - **The skill will out-review your fixture.** Several "false positives" on supposedly clean
-  files were real bugs in the fixture. Check a false positive before tightening the skill.
+  files were real bugs in the fixture. Check a false positive before tightening the skill. A council
+  review of `ux-laws` before its first run found twelve unplanted violations in its own fixture, a
+  "clean" screen that described three things the app could not do, and a scorer that passed a single
+  padded finding naming every law at full recall — all of which would have been read as skill failures.
+  Attack the eval before you trust it.
