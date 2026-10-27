@@ -10,6 +10,7 @@ some skills i rly like
 | [app-optimisation](app-optimisation/SKILL.md) | Measured performance lanes, benchmark-before-and-after, one-PR-at-a-time landing | `workflows/lanes.js` |
 | [persona-test](persona-test/SKILL.md) | Synthetic-persona usability tests: blinded agents drive the real web or iOS UI, findings reproduced and checked against the screen | `workflows/personas.js` |
 | [ux-laws](ux-laws/SKILL.md) | Audits an interface against 35 laws of UX from source, grading every finding by how certain its evidence is; optional rendered measurement | `workflows/ux-laws.js` |
+| [macos-cleanup](macos-cleanup/SKILL.md) | Reclaims disk on a macOS dev machine: audits agent worktrees (immune to stale `.git` pointers), build output, Docker, simulators, caches and Downloads; proves each deletion safe, asks, remeasures | none (scripts: `scan.sh`, `worktree-audit.sh`, `artifacts.sh`) |
 | [apple-fluid-design](apple-fluid-design/SKILL.md) | Apple's fluid-interface and motion principles for the web (springs, gestures, materials, type). Vendored from [emilkowalski/skills](https://github.com/emilkowalski/skills), MIT | none (guidance only) |
 
 ## Install

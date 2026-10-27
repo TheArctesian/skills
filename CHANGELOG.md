@@ -5,6 +5,16 @@ and record eval scores here.
 
 ## 2.5.0 — unreleased
 
+New skill: macos-cleanup. Measure, classify (regenerable, tool-owned, redundant copy, personal), verify,
+approve, delete, remeasure. Written from one real run that took a 1.8 TB disk from 25 GB to 788 GB free: about 940 GB
+was Claude Code and Codex worktrees, mostly Rust `target/`; 340 GB was Docker build-cache volumes and images; 59 GB
+agent-made simulators. The checks are scripts, each fixture-tested: `worktree-audit.sh` reads every worktree through
+its repo's own record, because after a repo rename `git status` fails inside the worktree and `| wc -l` reported 107
+worktrees as clean; it pairs moved worktrees back to their record and `worktree-remove.sh` repairs the kept ones so
+`git worktree prune` cannot orphan them. `artifacts.sh` lists `target`/`node_modules`/`.build` only beside their
+manifest (kondo's rule). `zip-extracted.py` checks name, size and CRC32: five numbered Snapchat export zips looked like
+duplicates and one held the only copy of a year of memories. Target catalog drawn from Mole, mac-cleanup-py and kondo.
+
 New skill: ux-laws. Audits an interface against 35 laws — 28 of the 30 on lawsofux.com (Cognitive Bias and Flow are
 framing rather than checks), plus visual hierarchy, progressive disclosure, recognition over recall, feedback loops and
 error prevention from Nielsen's heuristics, asymmetric choice for the deceptive-pattern class the others only point at,
