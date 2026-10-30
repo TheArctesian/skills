@@ -59,9 +59,12 @@ function langOf(path: string): Lang {
 
 const squash = (s: string) => s.replace(/\s+/g, ' ').trim();
 
-function tsTokens(text: string): string {
+// A generic arrow `<T>(x) =>` parses as JSX under TSX, so only .tsx/.jsx get the JSX grammar.
+const kindOf = (ts: any, path: string) => /\.[jt]sx$/.test(path) ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+
+function tsTokens(text: string, path = 'x.ts'): string {
 	const ts = getTs();
-	const sf = ts.createSourceFile('x.ts', text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+	const sf = ts.createSourceFile('x.ts', text, ts.ScriptTarget.Latest, true, kindOf(ts, path));
 	const out: string[] = [];
 	const walk = (n: any) => {
 		if (n.kind >= ts.SyntaxKind.FirstJSDocNode && n.kind <= ts.SyntaxKind.LastJSDocNode) return;
@@ -73,10 +76,10 @@ function tsTokens(text: string): string {
 	return out.join('\u0001');
 }
 
-function tsCommentLines(text: string): number {
+function tsCommentLines(text: string, path = 'x.ts'): number {
 	const ts = getTs();
 	let n = 0;
-	const sf = ts.createSourceFile('x.ts', text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+	const sf = ts.createSourceFile('x.ts', text, ts.ScriptTarget.Latest, true, kindOf(ts, path));
 	const seen = new Set<number>();
 	const visit = (node: any) => {
 		for (const r of [...(ts.getLeadingCommentRanges(text, node.getFullStart()) ?? []), ...(ts.getTrailingCommentRanges(text, node.getEnd()) ?? [])]) {
@@ -219,7 +222,7 @@ function svelteParts(text: string) {
 
 function strip(path: string, text: string): string {
 	switch (langOf(path)) {
-		case 'ts': return tsTokens(text);
+		case 'ts': return tsTokens(text, path);
 		case 'svelte':
 			return svelteParts(text).map((p) =>
 				p.kind === 'script' ? tsTokens(p.text)
@@ -235,7 +238,7 @@ function strip(path: string, text: string): string {
 
 function commentLines(path: string, text: string): number {
 	switch (langOf(path)) {
-		case 'ts': return tsCommentLines(text);
+		case 'ts': return tsCommentLines(text, path);
 		case 'svelte':
 			return svelteParts(text).reduce((sum, p) =>
 				sum + (p.kind === 'script' ? tsCommentLines(p.text)

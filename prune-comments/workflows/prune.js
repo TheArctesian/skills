@@ -268,6 +268,7 @@ strings. Return at most 60 files.`,
 if (skipped.length) log(`budget reached; skipped ${skipped.length}: ${skipped.slice(0, 10).join(', ')}`)
 
 // ---------- Report ----------
+const chunk = (xs, n) => Array.from({ length: Math.ceil(xs.length / n) }, (_, i) => xs.slice(i * n, (i + 1) * n))
 const all = perComp.filter(Boolean).flatMap(c => c.shards).concat(critic)
 const sum = k => all.reduce((s, r) => s + (r[k] || 0), 0)
 const byClass = {}
@@ -279,7 +280,8 @@ return {
     name: c.comp, files: c.files, shards: c.shards.length, baseline: c.baseline, gates: c.gates && c.gates.results,
     reviews: c.reviews && c.reviews.map(r => `${r.overturned}/${r.sampled}`),
   })),
-  proposals: MODE === 'apply' ? undefined : all.flatMap(r => r.proposals || []),
+  // The VM boundary caps arrays at 4096 elements, so proposals cross as chunks.
+  proposals: MODE === 'apply' ? undefined : chunk(all.flatMap(r => r.proposals || []), 2000),
   reverted: all.flatMap(r => r.reverted || []),
   rule_needs_test: all.flatMap(r => r.rule_needs_test || []),
   renames: all.flatMap(r => r.renames || []),
