@@ -1,0 +1,130 @@
+<title>Motion Reel</title>
+<!-- Starting point for a showcase reel. Replace the tokens, the scene and the storyboard; keep the engine.
+     Every style comes from t inside seek(t). See references/reel.md. -->
+<style>
+	:root { --paper:#fff; --wash:#f4f4f2; --ink:#222; --muted:#666; --line:rgba(0,0,0,.18); color-scheme:light; }
+	body { margin:0; padding-inline:16px; background:var(--wash); color:var(--ink); font:16px system-ui,sans-serif; box-sizing:border-box; }
+	.page { display:grid; justify-items:center; gap:12px; padding-block:16px; }
+	#frame { width:min(100%,calc(100vh - 96px),1440px); aspect-ratio:1; position:relative; overflow:hidden; background:var(--paper); }
+	#stage,#world { position:absolute; left:0; top:0; width:1440px; height:1440px; transform-origin:0 0; overflow:hidden; }
+	.abs { position:absolute; left:0; top:0; }
+	.pill { display:grid; place-items:center; height:56px; font-size:24px; }
+	.ind { background:var(--ink); border-radius:10px; height:56px; top:0; }
+	.box { border:1px solid var(--line); border-radius:12px; }
+	.btn { background:var(--ink); color:var(--paper); overflow:hidden; display:grid; place-items:center; font-size:28px; white-space:nowrap; }
+	.btn > * { grid-area:1/1; }
+	#cursor { position:absolute; left:0; top:0; width:42px; height:50px; transform-origin:4px 4px; }
+	.bar { display:flex; gap:12px; align-items:center; width:min(100%,720px); color:var(--muted); font-size:14px; flex-wrap:wrap; }
+	.bar input { flex:1; min-width:160px; }
+	body.render { padding:0; background:var(--paper); } body.render .page { padding:0; } body.render .bar { display:none; }
+	body.render #frame { width:1440px; }
+</style>
+<div class="page">
+	<div id="frame" role="img" aria-label="A looping demonstration of proposed motion, on synthetic content"><div id="stage">
+		<div id="world" data-seam></div>
+		<svg id="cursor" data-seam viewBox="0 0 28 34" aria-hidden="true"><path d="M3 3 L3 27 L9.5 21 L14 31 L18 29.2 L13.6 19.4 L22 19.4 Z" fill="#222" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+	</div></div>
+	<div class="bar"><button id="play" type="button">Pause</button><input id="scrub" type="range" min="0" max="1" step="0.001" aria-label="Reel position"><span id="now"></span></div>
+</div>
+<script>
+'use strict';
+// ---- engine: keep this -------------------------------------------------------------------------
+const BPM = 120, BARS = 4, BEAT = 60 / BPM, T = BARS * 4 * BEAT;
+const B = n => (n - 1) * BEAT;                 // beat n starts here
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+function bezier(x1, y1, x2, y2) {
+	const f = (a, b, s) => ((1 - 3 * b + 3 * a) * s + 3 * b - 6 * a) * s * s + 3 * a * s;
+	return p => { if (p <= 0) return 0; if (p >= 1) return 1; let lo = 0, hi = 1, s = p;
+		for (let i = 0; i < 24; i++) { s = (lo + hi) / 2; f(x1, x2, s) < p ? lo = s : hi = s; } return f(y1, y2, s); };
+}
+const EASE_OUT = bezier(.2, .7, .2, 1), EASE_IN = bezier(.4, 0, 1, 1);   // use the product's curves
+const tw = (t, t0, d, ease = EASE_OUT) => ease(clamp((t - t0) / d));
+// Closed-form step response. zeta < 1 overshoots slightly; keep it at 0.9 or above: bounce is not the point.
+function S(x, { response, zeta }) {
+	if (x <= 0) return 0;
+	const w = 2 * Math.PI / response;
+	if (zeta >= 1) return 1 - (1 + w * x) * Math.exp(-w * x);
+	const wd = w * Math.sqrt(1 - zeta * zeta), k = zeta * w;
+	return 1 - Math.exp(-k * x) * (Math.cos(wd * x) + (k / wd) * Math.sin(wd * x));
+}
+const SPRINGS = { travel: { response: .35, zeta: .9 }, lead: { response: .28, zeta: .9 }, trail: { response: .40, zeta: .9 }, camera: { response: .7, zeta: 1 } };
+// One spring per change, plus the previous loop's tail. Targets must return to `start`, which makes the
+// loop exactly periodic in value and velocity.
+function sum(t, start, events, spring) {
+	let v = start, prev = start;
+	for (const [ti, g] of events) { v += (g - prev) * (S(t - ti, spring) + S(t + T - ti, spring)); prev = g; }
+	return v;
+}
+const sumN = (t, start, events, spring) => start.map((s, k) => sum(t, s, events.map(e => [e[0], e[1][k]]), spring));
+
+// ---- storyboard: replace ------------------------------------------------------------------------
+const REST = [1180, 1320];
+const CURSOR = [[B(1), [630, 640]], [B(5), [810, 640]], [B(9), [720, 900]], [B(13), [450, 640]], [B(15), REST]];
+const CAMERA = [[B(1) + .1, [1.3, 560, 680]], [B(9), [1.2, 720, 860]], [B(15), [1, 720, 720]]];
+const PRESS = [B(3), B(7), B(11), B(14)];
+const LABELS = ['to Week', 'hover', 'press Week', 'edges stretch', 'to Month', 'hover', 'press Month', 'edges stretch',
+	'to Save', 'hover', 'press Save', 'narrows to a wait', 'check draws', 'press Day', 'back to rest', 'settle'];
+const W = 180, X = [360, 360 + W, 360 + 2 * W];   // Day, Week, Month pills
+
+// ---- scene: replace ------------------------------------------------------------------------------
+const world = document.getElementById('world'), cursor = document.getElementById('cursor');
+const el = (cls, css, html = '', parent = world) => { const e = document.createElement('div'); e.className = cls; e.style.cssText = css; e.innerHTML = html; parent.appendChild(e); return e; };
+el('abs box', 'left:300px;top:300px;width:840px;height:840px');
+el('abs', 'left:360px;top:360px;font-size:48px', 'Synthetic screen');
+const ind = el('abs ind', 'top:612px');
+['Day', 'Week', 'Month'].forEach((s, i) => el('abs pill', `left:${X[i]}px;top:612px;width:${W}px`, s));
+const pillText = [...world.querySelectorAll('.pill')];
+const btn = el('abs btn', '');
+const label = el('', '', 'Save', btn);
+const ring = el('', 'width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;box-sizing:border-box', '', btn);
+const check = el('', '', '<svg width="34" height="34" viewBox="0 0 20 20"><path id="tick" d="M4.5 10.5 L8.5 14.2 L15.5 6.2" pathLength="1" stroke-dasharray="1" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>', btn);
+const tick = check.querySelector('#tick');
+
+function seek(tIn) {
+	const t = ((tIn % T) + T) % T;
+	const [cs, cx, cy] = sumN(t, [1, 720, 720], CAMERA, SPRINGS.camera);
+	world.style.transform = `translate(${720 - cx * cs}px, ${720 - cy * cs}px) scale(${cs})`;
+
+	// Paired edges: whichever edge moves toward the change leads, on the stiffer spring. The last event returns home.
+	const l = sum(t, X[0], [[B(3), X[1]], [B(7), X[2]], [B(14), X[0]]], t < B(14) ? SPRINGS.trail : SPRINGS.lead);
+	const r = sum(t, X[0] + W, [[B(3), X[1] + W], [B(7), X[2] + W], [B(14), X[0] + W]], t < B(14) ? SPRINGS.lead : SPRINGS.trail);
+	ind.style.transform = `translateX(${l}px)`; ind.style.width = `${r - l}px`;
+	pillText.forEach((e, i) => { const c = X[i] + W / 2; e.style.color = c > l && c < r ? 'var(--paper)' : 'var(--ink)'; });
+
+	// One element is the button, the wait and the check. It re-forms before the loop ends.
+	const narrow = tw(t, B(12), .22) * (1 - tw(t, B(14), .22));
+	const w = lerp(240, 72, narrow);
+	btn.style.cssText = `left:${720 - w / 2}px;top:864px;width:${w}px;height:72px;border-radius:${lerp(12, 36, narrow)}px`;
+	const out = 1 - tw(t, B(12), .16, EASE_IN), back = tw(t, B(14) + .06, .22), lo = t < B(14) ? out : back;
+	label.style.opacity = lo; label.style.filter = `blur(${(1 - lo) * 2}px)`;
+	ring.style.opacity = t < B(13) ? tw(t, B(12) + .22, .16) : 1 - tw(t, B(13), .16, EASE_IN);
+	ring.style.transform = `rotate(${Math.max(0, t - B(12)) / 1.4 * 360}deg)`;
+	tick.style.strokeDashoffset = 1 - tw(t, B(13), .26);
+	check.style.opacity = t < B(13) ? 0 : 1 - tw(t, B(14), .16, EASE_IN);
+
+	// Cursor in screen space, so the camera never scales it.
+	const [wx, wy] = sumN(t, REST, CURSOR, SPRINGS.travel);
+	let press = 1;
+	for (const p of PRESS) if (t >= p && t < p + .25) press = Math.min(press, 1 - .1 * Math.sin(Math.PI * (t - p) / .25));
+	cursor.style.transform = `translate(${720 + (wx - cx) * cs - 4}px, ${720 + (wy - cy) * cs - 4}px) scale(${press})`;
+	return t;
+}
+window.seek = seek; window.REEL = { T, BEAT };
+
+// ---- playback: keep ------------------------------------------------------------------------------
+const render = new URLSearchParams(location.search).has('render');
+if (render) document.body.classList.add('render');
+const stage = document.getElementById('stage'), frame = document.getElementById('frame');
+const scrub = document.getElementById('scrub'), now = document.getElementById('now'), play = document.getElementById('play');
+const fit = () => { stage.style.transform = `scale(${frame.clientWidth / 1440})`; };
+new ResizeObserver(fit).observe(frame); fit(); scrub.max = T;
+let reduced = false; try { reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch {}
+let playing = !render && !reduced, origin = performance.now();
+const show = t => { const s = seek(t), b = Math.floor(s / BEAT); scrub.value = s; now.textContent = `${s.toFixed(2)} s · beat ${b + 1} · ${LABELS[b] || ''}`; };
+play.textContent = playing ? 'Pause' : 'Play';
+play.onclick = () => { playing = !playing; play.textContent = playing ? 'Pause' : 'Play'; if (playing) origin = performance.now() - scrub.value * 1000; };
+scrub.oninput = () => { playing = false; play.textContent = 'Play'; show(+scrub.value); };
+show(reduced ? B(13) + .3 : 0);
+if (!render) { const loop = ts => { if (playing) show((ts - origin) / 1000); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+</script>

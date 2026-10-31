@@ -5,6 +5,13 @@ and record eval scores here.
 
 ## 2.5.0 — unreleased
 
+New skill: motion-audit. Baseline, measure in the running app, classify, score, report, then a looping reel whose every
+style is a pure function of time, with springs summed per change so the seam is exactly periodic. Written from one audit
+of a SvelteKit dashboard and its build. `measurement.md` records the readings that lied: a hidden document aborting view
+transitions, a fast local API hiding staged layout shift (0 locally, 0.24–0.51 with batches 400 ms apart), pausing at
+`ready` hiding transitions cut off at 60–100 of 220 ms. `build.md` records defects that passed every gate and fell only to
+mutation and browser review. `probe.py` refuses non-local hosts by default. No eval or workflow yet.
+
 New skill: macos-cleanup. Measure, classify (regenerable, tool-owned, redundant copy, personal), verify,
 approve, delete, remeasure. Written from one real run that took a 1.8 TB disk from 25 GB to 788 GB free: about 940 GB
 was Claude Code and Codex worktrees, mostly Rust `target/`; 340 GB was Docker build-cache volumes and images; 59 GB
