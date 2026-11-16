@@ -5,6 +5,7 @@ some skills i rly like
 | Skill | What it does | Workflow |
 |---|---|---|
 | [prune-comments](prune-comments/SKILL.md) | Deletes slop comments, keeps contracts, rules and non-obvious reasons; proves the diff is comment-only | `workflows/prune.js` |
+| [unix-modularity-standardiser](unix-modularity-standardiser/SKILL.md) | Makes feature ownership and execution boundaries clear from the code. Audits oversized files and duplication, with an optional 300-code-line CI gate. | scripts: `scan.py`, `dedup.py` |
 | [code-quality](code-quality/SKILL.md) | CUPID review and refactoring (Composable, Unix philosophy, Predictable, Idiomatic, Domain-based) | `workflows/cupid.js` |
 | [test-audit](test-audit/SKILL.md) | Authoring gate, audit and campaign for low-value or implementation-coupled tests | `workflows/test-audit.js` |
 | [app-optimisation](app-optimisation/SKILL.md) | Measured performance lanes, benchmark-before-and-after, one-PR-at-a-time landing | `workflows/lanes.js` |

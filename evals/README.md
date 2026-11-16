@@ -25,6 +25,9 @@ python3 evals/score.py prune-comments result.json --tree <repo>   # apply run: s
 The scorer prints recall, keep rate, false positives, what was missed or wrongly flagged,
 and the workflow `version`; it exits non-zero below the bar.
 
+The modularity scanner has a standalone CLI regression suite. Run it with
+`python3 evals/unix-modularity-standardiser/test_scan.py`.
+
 ## Apply runs
 
 Score an apply run with `--tree <fixture copy>`: the scorer reads the edited files and also
