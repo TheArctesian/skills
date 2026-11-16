@@ -17,25 +17,46 @@ some skills i rly like
 
 ## Install
 
+Requires Bash and Python 3.9+. Run from a checkout you plan to keep:
+
 ```sh
-git clone <this repo> ~/Scripts/Personal/skills
-~/Scripts/Personal/skills/install.sh          # --remove to undo
+git clone https://github.com/TheArctesian/skills.git
+cd skills
+./install.sh           # link into every supported user-wide skill directory
+./install.sh --list    # show every supported agent and its resolved path
+./install.sh --remove  # remove links made to this checkout
 ```
 
-`install.sh` symlinks each skill folder into `~/.claude/skills/` and the persona-test agents into
-`~/.claude/agents/`, so edits in the checkout are live. Then:
+The installer covers Codex, Claude Code, OpenCode, Devin, DeepSeek Harness,
+DeepSeek TUI, Kimi Code CLI, Cursor, GitHub Copilot, Gemini CLI, and the rest of
+the [supported agent registry](scripts/agent-skill-paths.tsv). It prepares the
+directories even when the agent CLI is absent. Agents that share a directory
+reuse the same links. Edits in the checkout are live, and existing files or
+links from other sources are preserved. Restart your agent to refresh discovery.
 
-1. Add the checkout to the directories every session may read, once, in `~/.claude/settings.json`:
-   `"permissions": { "additionalDirectories": ["/path/to/checkout"] }`. The Workflow tool loads a `scriptPath`
-   only from a readable directory; without this a session in another project must paste the script inline.
-2. Start a new Claude Code session, so the skills and agents are registered.
-3. For persona-test: Node (`npx`), and Xcode with simulators for iOS. Agents cannot come from a plugin, because
-   plugin agents ignore `mcpServers`.
+For project-scoped installation, use `./install.sh --project /path/to/project`.
+This includes project-only tools such as Eve and PromptScript. Add `--list` to
+preview the paths or `--remove` to undo. These links point to your local checkout
+and should stay out of project commits.
+
+All targets receive the `SKILL.md` bundles. The `Workflow` scripts and
+persona-test's custom agents use Claude Code features. User-wide install also
+links the persona agents into Claude Code's agent directory. To run the
+workflows from another project, add your skills checkout to
+`permissions.additionalDirectories` in Claude Code settings (or use
+`/permissions` → Additional directories). Persona-test uses Node (`npx`) and
+requires Xcode with simulators for iOS.
+
+The registry uses the [Vercel Agent Skills compatibility list](https://github.com/vercel-labs/skills/blob/main/docs/agents.md)
+and adds [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md)
+and [DeepSeek TUI](https://github.com/deniscai/DeepSeek-TUI#skills), which read a
+shared skills directory. Local installs work offline. Cloud agents need the
+bundles in the environment where they run.
 
 ## How the workflows are built
 
-Every skill ships a [Workflow](https://code.claude.com) script that the skill tells Claude to
-run; invoking the skill is the opt-in. They share one shape so they work on any repository:
+Skills with a [Workflow](https://code.claude.com) script invoke it through Claude Code.
+The workflows share a common structure across repositories:
 
 1. **Profile.** One agent reads `AGENTS.md`/`CLAUDE.md`/`CONTRIBUTING`, manifests and CI to find
    components, languages, gates and conventions. Nothing repo-specific is hard-coded; pass
